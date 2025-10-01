@@ -33,8 +33,46 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
-  get: ^4.7.2
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8 # iOS style icons.
+  intl_phone_number_input: ^0.7.5 # For international phone number input and validation.
+  get: ^4.7.2 # For state management, dependency injection, and route management.
+  flutter_svg: ^2.2.1 # To render SVG files in Flutter.
+
+  # Firebase Packages
+  firebase_core: ^4.1.1 # Required to use any Firebase service.
+  firebase_auth: ^6.1.0 # For user authentication (email, Google, Facebook, etc.).
+  cloud_firestore: ^6.0.2 # NoSQL cloud database to store and sync data.
+  flutter_facebook_auth: ^7.1.2 # To implement Facebook login.
+  firebase_messaging: ^16.0.2 # For push notifications.
+  cloud_functions: ^6.0.2 # To run backend code in response to events triggered by Firebase features.
+  firebase_remote_config: ^6.0.2 # To change app behavior and appearance without publishing an update.
+
+  # Other Utility Packages
+  google_sign_in: ^7.2.0 # To implement Google Sign-In.
+  flutter_secure_storage: ^9.2.4 # For secure data storage (e.g., tokens).
+  shared_preferences: ^2.5.3 # For storing simple key-value data.
+  url_launcher: ^6.3.2 # To launch URLs in a mobile browser.
+  share_plus: ^12.0.0 # To share content with other apps.
+  font_awesome_flutter: ^10.10.0 # Provides a wide range of icons.
+  permission_handler: ^12.0.1 # To request and check app permissions (e.g., camera, location).
+  dio: ^5.9.0 # A powerful HTTP client for Dart, used for making API requests.
+  cached_network_image: ^3.4.1 # To show and cache images from the internet.
+  flutter_local_notifications: ^19.4.2 # For displaying local notifications.
+  flutter_cache_manager: ^3.4.1 # For caching files in your app.
+  package_info_plus: ^9.0.0 # To get app version and build number.
+  intl: ^0.20.2 # For internationalization and localization (e.g., date formatting).
+  path_provider: ^2.1.5 # To find commonly used locations on the filesystem.
+  google_fonts: ^6.3.2 # To easily use fonts from fonts.google.com.
+  shimmer: ^3.0.0 # To show a shimmering loading effect.
+  infinite_scroll_pagination: ^5.1.1 # To implement paginated lists that load more items as you scroll.
+  image_picker: ^1.2.0 # To pick images from the device's camera or gallery.
+  gal: ^2.3.2 # To save images and videos to the device gallery.
+  rxdart: ^0.28.0 # Adds reactive programming capabilities to Dart.
+  lottie: ^3.3.2 # To render Lottie animations (JSON-based animations).
+  emoji_picker_flutter: ^4.3.0 # A customizable emoji picker widget.
+
 
 dev_dependencies:
   flutter_test:
