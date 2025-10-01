@@ -43,3 +43,17 @@ android {
 flutter {
     source = "../.."
 }
+dependencies {
+    // Core Android and Kotlin dependencies
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10")
+
+    // AndroidX dependencies for better compatibility
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.annotation:annotation:1.7.1")
+
+    // Additional dependencies for Window Manager (for your security flags)
+    implementation("androidx.window:window:1.2.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+}
