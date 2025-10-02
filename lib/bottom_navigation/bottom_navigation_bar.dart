@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+/// A custom bottom navigation bar widget.
+///
+/// This widget is designed to be reusable and customizable.
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -12,79 +16,51 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double fabSpace = MediaQuery.of(context).size.width * 0.18; // ✅ responsive gap
+    final theme = Theme.of(context);
 
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNavItem(
-              icon: Icons.home,
-              label: "Home",
-              index: 0,
-              isSelected: currentIndex == 0,
-              onTap: onTap,
-            ),
-            _buildNavItem(
-              icon: Icons.favorite,
-              label: "Donors",
-              index: 1,
-              isSelected: currentIndex == 1,
-              onTap: onTap,
-            ),
-            SizedBox(width: fabSpace), // ✅ FAB ke liye responsive jagah
-            _buildNavItem(
-              icon: Icons.bloodtype_outlined,
-              label: "Need",
-              index: 2,
-              isSelected: currentIndex == 2,
-              onTap: onTap,
-            ),
-            _buildNavItem(
-              icon: Icons.person,
-              label: "Profile",
-              index: 3,
-              isSelected: currentIndex == 3,
-              onTap: onTap,
-            ),
-          ],
-        ),
-      ),
+    return BottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: onTap,
+      iconSize: 30,
+      selectedFontSize: 14,
+      unselectedFontSize: 12,
+
+      mouseCursor: SystemMouseCursors.grab,
+      enableFeedback: true,
+      landscapeLayout: BottomNavigationBarLandscapeLayout.spread,
+      useLegacyColorScheme: true,
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white,
+      selectedItemColor: Colors.red,
+      // selectedItemColor: theme.colorScheme.primary,
+      unselectedItemColor: theme.unselectedWidgetColor,
+      showUnselectedLabels: true, // Explicitly show labels for all items
+      items: _navBarItems,
     );
   }
 
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required int index,
-    required bool isSelected,
-    required Function(int) onTap,
-  }) {
-    return InkWell(
-      onTap: () => onTap(index),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 22,
-              color: isSelected ? Colors.red : Colors.grey,
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.red : Colors.grey,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Using a private getter for the list of items improves readability
+  // and keeps the build method cleaner.
+  static const List<BottomNavigationBarItem> _navBarItems = [
+    BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.house),
+      label: "Home",
+      activeIcon: Icon(FontAwesomeIcons.houseMedical), // Example of an active icon
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.handHoldingDroplet),
+      label: "Donors",
+      activeIcon: Icon(FontAwesomeIcons.handHoldingDroplet),
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.bloodtype_outlined),
+      label: "Need",
+      activeIcon: Icon(Icons.bloodtype),
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.person_outline),
+      label: "Profile",
+      activeIcon: Icon(Icons.person),
+    ),
+  ];
 }

@@ -135,15 +135,15 @@ class _SignInScreenState extends State<SignInScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       SocialButton(
-                        assetPath: "assets/images/google.png",
+                        assetPath: "assets/icons/google.png",
                         onPressed: () {},
                       ),
                       SocialButton(
-                        assetPath: "assets/images/facebook.png",
+                        assetPath: "assets/icons/facebook.png",
                         onPressed: () {},
                       ),
                       SocialButton(
-                        assetPath: "assets/images/apple.png",
+                        assetPath: "assets/icons/apple.png",
                         onPressed: () {},
                       ),
                     ],
