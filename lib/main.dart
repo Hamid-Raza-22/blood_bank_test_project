@@ -1,4 +1,6 @@
+import 'package:blood_bank_test_project/onboarding/onboarding_screens/onboarding_screen1.dart';
 import 'package:blood_bank_test_project/screens/login_screen.dart';
+import 'package:blood_bank_test_project/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'constant/size_helper.dart';
@@ -17,7 +19,7 @@ class MyApp extends StatelessWidget {
         SizeConfig().init(context);
         return const MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: SignInScreen(),
+          home:SplashScreen(),
         );
       },
     );

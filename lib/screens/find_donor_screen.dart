@@ -82,7 +82,7 @@ class _FindDonorScreenState extends State<FindDonorScreen> {
                     ),
                   ),
                   SizedBox(
-                    width: SizeConfig.blockWidth * 25, // ✅ fix width dropdown
+                    width: SizeConfig.blockWidth * 13, // ✅ fix width dropdown
                     child: CustomDropdown(
                       value: _selectedUnits,
                       onChanged: (val) {

@@ -46,7 +46,7 @@ flutter {
 dependencies {
     // Core Android and Kotlin dependencies
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10")
+//    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10")
 
     // AndroidX dependencies for better compatibility
     implementation("androidx.core:core-ktx:1.12.0")

@@ -16,7 +16,9 @@ class CustomButton extends StatelessWidget {
     required this.onPressed,
     this.color = AppColors.primary,
     this.textColor = AppColors.white,
+
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,9 @@ class CustomButton extends StatelessWidget {
       width: double.infinity,
       height: SizeConfig.blockHeight * 6, // ✅ responsive height
       child: ElevatedButton(
+
         style: ElevatedButton.styleFrom(
+
           backgroundColor: color,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
