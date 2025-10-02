@@ -24,7 +24,6 @@ class CustomBottomNavBar extends StatelessWidget {
       iconSize: 30,
       selectedFontSize: 14,
       unselectedFontSize: 12,
-
       mouseCursor: SystemMouseCursors.grab,
       enableFeedback: true,
       landscapeLayout: BottomNavigationBarLandscapeLayout.spread,
