@@ -16,7 +16,7 @@ class FirebaseService {
       await ref.putFile(file);
       return await ref.getDownloadURL();
     } catch (e) {
-      print("FirebaseService ERROR: Photo upload failed: $e");
+      debugPrint("FirebaseService ERROR: Photo upload failed: $e");
       return null;
     }
   }
@@ -35,10 +35,10 @@ class FirebaseService {
         body: jsonEncode({'token': token, 'title': title, 'body': body}),
       );
       if (response.statusCode != 200) {
-        print("FirebaseService ERROR: FCM send failed: ${response.body}");
+        debugPrint("FirebaseService ERROR: FCM send failed: ${response.body}");
       }
     } catch (e) {
-      print("FirebaseService ERROR: FCM send failed: $e");
+      debugPrint("FirebaseService ERROR: FCM send failed: $e");
     }
   }
 

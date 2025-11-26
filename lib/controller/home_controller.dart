@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/auth_controller.dart';
 
@@ -21,7 +22,7 @@ class HomeController extends GetxController {
         if (doc.exists) {
           userData.value = doc.data()!;
         }
-      }, onError: (e) => print("HomeController ERROR: $e"));
+      }, onError: (e) => debugPrint("HomeController ERROR: $e"));
     }
   }
 
@@ -34,7 +35,7 @@ class HomeController extends GetxController {
         .snapshots()
         .listen((snapshot) {
       requests.value = snapshot.docs;
-      print("HomeController LOG: Fetched ${requests.length} requests");
-    }, onError: (e) => print("HomeController ERROR: $e"));
+      debugPrint("HomeController LOG: Fetched ${requests.length} requests");
+    }, onError: (e) => debugPrint("HomeController ERROR: $e"));
   }
 }

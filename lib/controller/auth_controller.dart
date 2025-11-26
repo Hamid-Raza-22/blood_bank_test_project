@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' hide Location;
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:location/location.dart';
 import 'package:blood_bank_test_project/constant/colors.dart';
@@ -23,7 +24,7 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
     firebaseUser.bindStream(FirebaseAuth.instance.authStateChanges());
-    print("AuthController LOG: Binding auth state changes");
+    debugPrint("AuthController LOG: Binding auth state changes");
   }
 
   // Generate random 6-digit OTP
@@ -50,7 +51,7 @@ class AuthController extends GetxController {
       Get.snackbar("OTP Sent", "An OTP has been sent to $email");
       Get.to(() => VerifyOtpScreen());
     } catch (e) {
-      print("AuthController ERROR: Send OTP failed: $e");
+      debugPrint("AuthController ERROR: Send OTP failed: $e");
       Get.snackbar("OTP Error", e.toString());
     } finally {
       isLoading.value = false;
@@ -88,15 +89,15 @@ class AuthController extends GetxController {
           'city': city,
           'createdAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-        print("AuthController LOG: Signup successful: ${user.email}, Location: $city");
+        debugPrint("AuthController LOG: Signup successful: ${user.email}, Location: $city");
         Get.snackbar("Success", "Account created successfully in $city!");
         Get.offAllNamed('/login');
       } else {
-        print("AuthController LOG: Signup failed, user is null");
+        debugPrint("AuthController LOG: Signup failed, user is null");
         Get.snackbar("Error", "Signup failed.");
       }
     } catch (e) {
-      print("AuthController ERROR: Signup failed: $e");
+      debugPrint("AuthController ERROR: Signup failed: $e");
       Get.snackbar("Signup Error", e.toString());
     } finally {
       isLoading.value = false;
@@ -125,15 +126,17 @@ class AuthController extends GetxController {
           'city': city,
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-        print("AuthController LOG: Sign-in successful: ${user.email}, Location: $city");
+        debugPrint("AuthController LOG: Sign-in successful: ${user.email}, Location: $city");
+        // Save FCM token for notifications
+        await _saveFcmToken(user.uid);
         Get.snackbar("Success", "Logged in successfully in $city!");
         Get.offAllNamed('/profile');
       } else {
-        print("AuthController LOG: Sign-in failed, user is null");
+        debugPrint("AuthController LOG: Sign-in failed, user is null");
         Get.snackbar("Error", "Sign-in failed.");
       }
     } catch (e) {
-      print("AuthController ERROR: Sign-in failed: $e");
+      debugPrint("AuthController ERROR: Sign-in failed: $e");
       Get.snackbar("Login Error", e.toString());
     } finally {
       isLoading.value = false;
@@ -157,7 +160,7 @@ class AuthController extends GetxController {
       Get.snackbar("OTP Sent", "Password reset OTP sent to $email");
       Get.toNamed('/verifyResetOtp');
     } catch (e) {
-      print("AuthController ERROR: Send reset OTP failed: $e");
+      debugPrint("AuthController ERROR: Send reset OTP failed: $e");
       Get.snackbar("Error", e.toString());
     } finally {
       isLoading.value = false;
@@ -185,7 +188,7 @@ class AuthController extends GetxController {
       Get.snackbar("Success", "Password updated successfully!");
       Get.offAllNamed('/login');
     } catch (e) {
-      print("AuthController ERROR: Reset password failed: $e");
+      debugPrint("AuthController ERROR: Reset password failed: $e");
       Get.snackbar("Reset Error", e.toString());
     }
   }
@@ -194,7 +197,7 @@ class AuthController extends GetxController {
   Future<void> signInWithGoogle({bool isSignUp = false}) async {
     isLoading.value = true;
     try {
-      print("AuthController LOG: Starting Google Sign-In (isSignUp: $isSignUp)");
+      debugPrint("AuthController LOG: Starting Google Sign-In (isSignUp: $isSignUp)");
       final user = await _service.signInWithGoogle();
       if (user != null) {
         // Save user location and city
@@ -208,15 +211,17 @@ class AuthController extends GetxController {
           'city': city,
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-        print("AuthController LOG: Google Sign-In successful: ${user.email}, Location: $city");
+        debugPrint("AuthController LOG: Google Sign-In successful: ${user.email}, Location: $city");
+        // Save FCM token for notifications
+        await _saveFcmToken(user.uid);
         Get.snackbar("Success", isSignUp ? "Signed up with Google in $city!" : "Signed in with Google in $city!");
         Get.offAllNamed('/option');
       } else {
-        print("AuthController LOG: Google Sign-In failed, user is null");
+        debugPrint("AuthController LOG: Google Sign-In failed, user is null");
         Get.snackbar("Error", "Google Sign-In failed.");
       }
     } catch (e) {
-      print("AuthController ERROR: Google Sign-In failed: $e");
+      debugPrint("AuthController ERROR: Google Sign-In failed: $e");
       Get.snackbar(
         "Google Sign-In Error",
         e.toString(),
@@ -240,10 +245,10 @@ class AuthController extends GetxController {
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
       }
-      print("AuthController LOG: Profile updated successfully: $displayName");
+      debugPrint("AuthController LOG: Profile updated successfully: $displayName");
       Get.snackbar("Success", "Profile updated successfully!");
     } catch (e) {
-      print("AuthController ERROR: Profile update failed: $e");
+      debugPrint("AuthController ERROR: Profile update failed: $e");
       Get.snackbar("Error", "Profile update failed: $e");
     } finally {
       isLoading.value = false;
@@ -254,7 +259,7 @@ class AuthController extends GetxController {
   Future<void> signOut() async {
     await _service.signOut();
     Get.offAllNamed('/login');
-    print("AuthController LOG: Signed out");
+    debugPrint("AuthController LOG: Signed out");
   }
 
   Future<LocationData?> _getUserLocation() async {
@@ -272,7 +277,7 @@ class AuthController extends GetxController {
       }
       return await location.getLocation();
     } catch (e) {
-      print("AuthController ERROR: Failed to get location: $e");
+      debugPrint("AuthController ERROR: Failed to get location: $e");
       return null;
     }
   }
@@ -284,8 +289,24 @@ class AuthController extends GetxController {
           ? placemarks.first.locality ?? placemarks.first.administrativeArea ?? 'Unknown'
           : 'Unknown';
     } catch (e) {
-      print("AuthController ERROR: Failed to get city: $e");
+      debugPrint("AuthController ERROR: Failed to get city: $e");
       return 'Unknown';
+    }
+  }
+
+  // Save FCM token to Firestore for notifications
+  Future<void> _saveFcmToken(String userId) async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await _firestore.collection('users').doc(userId).set({
+          'fcmToken': token,
+          'tokenUpdatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+        debugPrint("AuthController LOG: FCM Token saved: ${token.substring(0, 20)}...");
+      }
+    } catch (e) {
+      debugPrint("AuthController ERROR: Failed to save FCM token: $e");
     }
   }
 }

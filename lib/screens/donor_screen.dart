@@ -15,6 +15,7 @@ import '../widgets/custom_text_field.dart' show CustomTextField;
 import '../widgets/select_group_grid.dart';
 import '../controller/request_controller.dart';
 import '../controller/auth_controller.dart';
+import '../controller/bottom_nav_controller.dart';
 
 class DonorScreen extends StatefulWidget {
   const DonorScreen({super.key});
@@ -30,6 +31,12 @@ class _DonorScreenState extends State<DonorScreen> {
   void initState() {
     super.initState();
     _cityController = TextEditingController();
+    
+    // Set nav index to 1 (Donors)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.find<NavController>().currentIndex.value = 1;
+    });
+    
     final controller = Get.find<RequestController>();
     _updateCityText(controller.city.value);
     ever(controller.city, (String city) => _updateCityText(city));
@@ -131,13 +138,6 @@ class _DonorScreenState extends State<DonorScreen> {
           );
         }),
         bottomNavigationBar: const CustomBottomNavBar(),
-        floatingActionButton: FloatingActionButton(
-          shape: const CircleBorder(),
-          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Center button tapped"))),
-          backgroundColor: const Color(0xFF8B0000),
-          child: Icon(FontAwesomeIcons.plus, size: SizeConfig.blockWidth * 8, color: Colors.white),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }

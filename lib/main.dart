@@ -4,6 +4,8 @@ import 'package:blood_bank_test_project/screens/all_donors_screen.dart';
 import 'package:blood_bank_test_project/screens/blood_instruction_screen.dart';
 import 'package:blood_bank_test_project/screens/blood_request_screen.dart';
 import 'package:blood_bank_test_project/screens/chat_list_screen.dart';
+import 'package:blood_bank_test_project/screens/chat_screen.dart';
+import 'package:blood_bank_test_project/screens/public_need_screen.dart';
 import 'package:blood_bank_test_project/screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,6 +26,7 @@ import 'package:blood_bank_test_project/controller/auth_controller.dart';
 import 'package:blood_bank_test_project/controller/home_controller.dart';
 import 'package:blood_bank_test_project/controller/request_controller.dart';
 import 'package:blood_bank_test_project/controller/bottom_nav_controller.dart';
+import 'package:blood_bank_test_project/services/notification_service.dart';
 import 'package:flutter/foundation.dart';
 
 // === WEB FIREBASE CONFIG ===
@@ -60,6 +63,11 @@ void main() async {
   Get.put(HomeController(), permanent: true);
   Get.put(RequestController(), permanent: true);
 
+  // Initialize notification service (not on web)
+  if (!kIsWeb) {
+    await Get.putAsync(() => NotificationService().init(), permanent: true);
+  }
+
   final prefs = await SharedPreferences.getInstance();
   final bool onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
   final User? user = FirebaseAuth.instance.currentUser;
@@ -93,7 +101,9 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/profile', page: () => const ProfileScreen()),
         GetPage(name: '/request', page: () => const BloodRequestScreen()),
         GetPage(name: '/notifications', page: () => const NotificationScreen()),
-        GetPage(name: '/chatList', page: () => const ChatScreen()),
+        GetPage(name: '/chatList', page: () => const ChatListScreen()),
+        GetPage(name: '/chat', page: () => const ChatScreen()),
+        GetPage(name: '/publicNeed', page: () => const PublicNeedScreen()),
         GetPage(name: '/bloodInstruction', page: () => const BloodInstructionScreen()),
         GetPage(name: '/alldonors', page: () => const AllDonorsScreen()),
       ],

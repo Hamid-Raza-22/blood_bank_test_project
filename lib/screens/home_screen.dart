@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     Get.put(HomeController());
     Get.put(RequestController());
-    print("HomeScreen LOG: initState - Set nav index to 0 (Home)");
+    debugPrint("HomeScreen LOG: initState - Set nav index to 0 (Home)");
     _fetchUserLocation();
   }
 
@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!serviceEnabled) {
         serviceEnabled = await location.requestService();
         if (!serviceEnabled) {
-          print("HomeScreen LOG: Location services disabled");
+          debugPrint("HomeScreen LOG: Location services disabled");
           return;
         }
       }
@@ -52,42 +52,36 @@ class _HomeScreenState extends State<HomeScreen> {
       if (permission == PermissionStatus.denied) {
         permission = await location.requestPermission();
         if (permission != PermissionStatus.granted) {
-          print("HomeScreen LOG: Location permission denied");
+          debugPrint("HomeScreen LOG: Location permission denied");
           return;
         }
       }
       LocationData loc = await location.getLocation();
       Get.find<RequestController>().setCoordinates(loc.latitude!, loc.longitude!);
-      print("HomeScreen LOG: User location set - Lat: ${loc.latitude}, Lng: ${loc.longitude}");
+      debugPrint("HomeScreen LOG: User location set - Lat: ${loc.latitude}, Lng: ${loc.longitude}");
     } catch (e) {
-      print("HomeScreen LOG: Failed to get location: $e");
+      debugPrint("HomeScreen LOG: Failed to get location: $e");
       Get.find<RequestController>().setCoordinates(31.5204, 74.3587);
     }
-  }
-
-  void _onCenterTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Center button tapped")),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    print("HomeScreen LOG: build - SizeConfig initialized");
+    debugPrint("HomeScreen LOG: build - SizeConfig initialized");
 
     final User? user = FirebaseAuth.instance.currentUser;
-    print("HomeScreen LOG: build - User is ${user != null ? 'not null' : 'null'}, UID: ${user?.uid}");
+    debugPrint("HomeScreen LOG: build - User is ${user != null ? 'not null' : 'null'}, UID: ${user?.uid}");
     if (user == null) {
-      print("HomeScreen LOG: User is null, redirecting to login");
+      debugPrint("HomeScreen LOG: User is null, redirecting to login");
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        print("HomeScreen LOG: Executing redirect to /login");
+        debugPrint("HomeScreen LOG: Executing redirect to /login");
         Get.offAllNamed('/login');
       });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    print(
+    debugPrint(
         "HomeScreen LOG: Building home UI with email: ${user.email ?? 'null'}, displayName: ${user.displayName ?? 'null'}, photoURL: ${user.photoURL ?? 'null'}");
 
     return Scaffold(
@@ -112,11 +106,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? userData['photoUrl']
                           : "assets/user1.png"),
                       onButtonTap: () {
-                        print("HomeScreen LOG: Messenger button tapped");
+                        debugPrint("HomeScreen LOG: Messenger button tapped");
                         Get.toNamed('/chatList');
                       },
                       onNotificationTap: () {
-                        print("HomeScreen LOG: Notification button tapped");
+                        debugPrint("HomeScreen LOG: Notification button tapped");
                         Get.toNamed('/notifications');
                       },
                     );
@@ -164,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             icon: Icons.search,
                             text: "Find Donors",
                             onTap: () {
-                              print("HomeScreen LOG: Find Donors tapped");
+                              debugPrint("HomeScreen LOG: Find Donors tapped");
                               Get.toNamed('/donors');
                             },
                           ),
@@ -173,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             icon: Icons.water_drop,
                             text: "Request for blood",
                             onTap: () {
-                              print("HomeScreen LOG: Request for blood tapped");
+                              debugPrint("HomeScreen LOG: Request for blood tapped");
                               Get.toNamed('/request');
                             },
                           ),
@@ -182,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             icon: Icons.info,
                             text: "BloodInstructions",
                             onTap: () {
-                              print("HomeScreen LOG: Blood Instructions tapped");
+                              debugPrint("HomeScreen LOG: Blood Instructions tapped");
                               Get.toNamed('/bloodInstruction');
                             },
                           ),
@@ -202,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            print("HomeScreen LOG: See all tapped");
+                            debugPrint("HomeScreen LOG: See all tapped");
                             Get.toNamed('/alldonors');
                           },
                           child: Text(
@@ -223,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
-                          print("HomeScreen ERROR: Stream error - ${snapshot.error}");
+                          debugPrint("HomeScreen ERROR: Stream error - ${snapshot.error}");
                           return const Center(child: Text('Error loading donors'));
                         }
                         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -247,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
 
                         if (filteredDonors.isEmpty) {
-                          print("HomeScreen LOG: No other donors found");
+                          debugPrint("HomeScreen LOG: No other donors found");
                           return const Center(
                             child: Text(
                               "No other donors available",
@@ -256,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }
 
-                        print("HomeScreen LOG: Showing ${filteredDonors.length} other donors");
+                        debugPrint("HomeScreen LOG: Showing ${filteredDonors.length} other donors");
 
                         return ListView.builder(
                           shrinkWrap: true,
@@ -276,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ).toStringAsFixed(1)}km"
                                 : "Unknown";
 
-                            print("HomeScreen LOG: Donor ${doc.id} - name: ${data['name']}, city: ${data['city']}, bloodType: ${data['bloodType']}");
+                            debugPrint("HomeScreen LOG: Donor ${doc.id} - name: ${data['name']}, city: ${data['city']}, bloodType: ${data['bloodType']}");
 
                             return CustomRequestTile(
                               name: data['name'] ?? "Unknown",
@@ -315,17 +309,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
-        onPressed: _onCenterTap,
-        backgroundColor: const Color(0xFF8B0000),
-        child: Icon(
-          FontAwesomeIcons.plus,
-          size: SizeConfig.blockWidth * 8,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

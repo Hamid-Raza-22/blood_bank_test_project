@@ -30,15 +30,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     final NavController navController = Get.find();
     navController.currentIndex.value = 3;
-    print("ProfileScreen LOG: initState - Set nav index to 3 (Profile)");
+    debugPrint("ProfileScreen LOG: initState - Set nav index to 3 (Profile)");
 
     Future.delayed(const Duration(milliseconds: 500), () {
       final User? user = FirebaseAuth.instance.currentUser;
-      print("ProfileScreen LOG: initState - User is ${user != null ? 'not null' : 'null'}");
+      debugPrint("ProfileScreen LOG: initState - User is ${user != null ? 'not null' : 'null'}");
       if (user != null) {
-        print("ProfileScreen LOG: User email: ${user.email ?? 'null'}, displayName: ${user.displayName ?? 'null'}, photoURL: ${user.photoURL ?? 'null'}");
+        debugPrint("ProfileScreen LOG: User email: ${user.email ?? 'null'}, displayName: ${user.displayName ?? 'null'}, photoURL: ${user.photoURL ?? 'null'}");
       } else {
-        print("ProfileScreen LOG: No user found in initState, will redirect in build");
+        debugPrint("ProfileScreen LOG: No user found in initState, will redirect in build");
       }
       setState(() {
         _isLoading = false;
@@ -54,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showEditProfileDialog() {
     final User? user = FirebaseAuth.instance.currentUser;
-    print("ProfileScreen LOG: Opening edit dialog, user: ${user?.email ?? 'null'}");
+    debugPrint("ProfileScreen LOG: Opening edit dialog, user: ${user?.email ?? 'null'}");
     nameController.text = user?.displayName ?? '';
 
     Get.dialog(
@@ -75,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              print("ProfileScreen LOG: Edit dialog cancelled");
+              debugPrint("ProfileScreen LOG: Edit dialog cancelled");
               Get.back();
             },
             child: const Text("Cancel"),
@@ -83,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () async {
               if (nameController.text.trim().isNotEmpty) {
-                print("ProfileScreen LOG: Saving new display name: ${nameController.text.trim()}");
+                debugPrint("ProfileScreen LOG: Saving new display name: ${nameController.text.trim()}");
                 await controller.updateProfile(nameController.text.trim());
                 setState(() {}); // Refresh UI
                 Get.back();
@@ -99,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget bloodStatsCard() {
-    print("ProfileScreen LOG: Building bloodStatsCard");
+    debugPrint("ProfileScreen LOG: Building bloodStatsCard");
     return Container(
       margin: EdgeInsets.symmetric(
           horizontal: SizeConfig.blockWidth * 4,
@@ -164,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget switchItem(String title, bool value, Function(bool) onChanged) {
-    print("ProfileScreen LOG: Building switchItem: $title");
+    debugPrint("ProfileScreen LOG: Building switchItem: $title");
     return Container(
       padding: EdgeInsets.symmetric(
           horizontal: SizeConfig.blockWidth * 4,
@@ -231,7 +231,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget forwardItem(String title, Function() onTap) {
-    print("ProfileScreen LOG: Building forwardItem: $title");
+    debugPrint("ProfileScreen LOG: Building forwardItem: $title");
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -267,21 +267,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    print("ProfileScreen LOG: build - SizeConfig initialized");
+    debugPrint("ProfileScreen LOG: build - SizeConfig initialized");
 
     if (_isLoading) {
-      print("ProfileScreen LOG: Showing loading indicator while auth settles");
+      debugPrint("ProfileScreen LOG: Showing loading indicator while auth settles");
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     final User? user = FirebaseAuth.instance.currentUser;
-    print("ProfileScreen LOG: build - User is ${user != null ? 'not null' : 'null'}");
+    debugPrint("ProfileScreen LOG: build - User is ${user != null ? 'not null' : 'null'}");
     if (user == null) {
-      print("ProfileScreen LOG: User is null, redirecting to login");
+      debugPrint("ProfileScreen LOG: User is null, redirecting to login");
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        print("ProfileScreen LOG: Executing redirect to /login");
+        debugPrint("ProfileScreen LOG: Executing redirect to /login");
         Get.offAllNamed('/login');
       });
       return const Scaffold(
@@ -289,7 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    print("ProfileScreen LOG: Building profile UI with email: ${user.email ?? 'null'}, displayName: ${user.displayName ?? 'null'}, photoURL: ${user.photoURL ?? 'null'}");
+    debugPrint("ProfileScreen LOG: Building profile UI with email: ${user.email ?? 'null'}, displayName: ${user.displayName ?? 'null'}, photoURL: ${user.photoURL ?? 'null'}");
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey[50],
@@ -306,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   avatarUrl: user.photoURL ?? "assets/user1.png",
                   showBack: true,
                   onBackTap: () {
-                    print("ProfileScreen LOG: Back button tapped");
+                    debugPrint("ProfileScreen LOG: Back button tapped");
                     Get.back();
                   },
                   onEditTap: _showEditProfileDialog,
@@ -342,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: SizeConfig.blockHeight * 1),
             GestureDetector(
               onTap: () {
-                print("ProfileScreen LOG: Logout tapped");
+                debugPrint("ProfileScreen LOG: Logout tapped");
                 controller.signOut();
               },
               child: Container(
@@ -379,17 +379,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
-        onPressed: () {},
-        backgroundColor: primaryRed,
-        child: Icon(
-          FontAwesomeIcons.plus,
-          size: SizeConfig.blockWidth * 8,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

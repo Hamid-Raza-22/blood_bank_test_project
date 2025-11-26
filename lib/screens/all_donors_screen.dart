@@ -36,7 +36,7 @@ class AllDonorsScreen extends StatelessWidget {
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                print("AllDonorsScreen ERROR: Stream error - ${snapshot.error}");
+                debugPrint("AllDonorsScreen ERROR: Stream error - ${snapshot.error}");
                 return const Center(child: Text('Error loading donors'));
               }
               if (snapshot.connectionState == ConnectionState.waiting) {

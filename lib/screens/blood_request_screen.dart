@@ -4,10 +4,24 @@ import 'package:get/Get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
+import '../controller/bottom_nav_controller.dart';
 import '../widgets/blood_request_card.dart';
 
-class BloodRequestScreen extends StatelessWidget {
+class BloodRequestScreen extends StatefulWidget {
   const BloodRequestScreen({super.key});
+
+  @override
+  State<BloodRequestScreen> createState() => _BloodRequestScreenState();
+}
+
+class _BloodRequestScreenState extends State<BloodRequestScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.find<NavController>().currentIndex.value = 2;
+    });
+  }
 
   void _updateRequestStatus(String requestId, String status) async {
     try {
@@ -38,13 +52,10 @@ class BloodRequestScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Blood Requests"),
+        title: const Text("Blood Requests", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(
         child: user == null

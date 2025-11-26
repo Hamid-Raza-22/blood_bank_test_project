@@ -12,11 +12,6 @@ class BloodInstructionScreen extends StatefulWidget {
 
 class _BloodInstructionScreenState extends State<BloodInstructionScreen> {
 
-  void _onCenterTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Center button tapped")),
-    );
-  }
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
@@ -144,21 +139,7 @@ class _BloodInstructionScreenState extends State<BloodInstructionScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
-        // currentIndex: 0,
-        // onTap: (index) {},
-      ),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
-        onPressed: _onCenterTap,
-        backgroundColor: const Color(0xFF8B0000),
-        child: Icon(
-          FontAwesomeIcons.plus,
-          size: SizeConfig.blockWidth * 8,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 }

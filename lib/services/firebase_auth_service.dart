@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -24,12 +25,12 @@ class AuthService {
           'signInMethod': 'email_password',
           'photoURL': null, // No photoURL for email sign-up
         });
-        print("AuthService LOG: User signed up: ${user.email}");
+        debugPrint("AuthService LOG: User signed up: ${user.email}");
       }
 
       return user;
     } on FirebaseAuthException catch (e) {
-      print("AuthService ERROR: Sign-up failed: ${e.code}");
+      debugPrint("AuthService ERROR: Sign-up failed: ${e.code}");
       throw _handleFirebaseError(e);
     }
   }
@@ -45,13 +46,13 @@ class AuthService {
         await _firestore.collection('users').doc(user.uid).update({
           'lastLogin': DateTime.now().toIso8601String(),
         }).catchError((e) {
-          print("Firestore update error: $e");
+          debugPrint("Firestore update error: $e");
         });
-        print("AuthService LOG: User signed in: ${user.email}");
+        debugPrint("AuthService LOG: User signed in: ${user.email}");
       }
       return user;
     } on FirebaseAuthException catch (e) {
-      print("AuthService ERROR: Sign-in failed: ${e.code}");
+      debugPrint("AuthService ERROR: Sign-in failed: ${e.code}");
       throw _handleFirebaseError(e);
     }
   }
@@ -64,11 +65,11 @@ class AuthService {
 
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        print("AuthService LOG: Google Sign-In cancelled by user.");
+        debugPrint("AuthService LOG: Google Sign-In cancelled by user.");
         throw "Google Sign-In cancelled.";
       }
 
-      print("AuthService LOG: Google user selected: ${googleUser.email}");
+      debugPrint("AuthService LOG: Google user selected: ${googleUser.email}");
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
@@ -91,18 +92,18 @@ class AuthService {
           'createdAt': user.metadata.creationTime?.toIso8601String() ?? DateTime.now().toIso8601String(),
           'lastLogin': DateTime.now().toIso8601String(),
         }, SetOptions(merge: true)).catchError((e) {
-          print("Firestore write error: $e");
+          debugPrint("Firestore write error: $e");
         });
 
-        print("AuthService LOG: User authenticated: ${user.email}, photoURL: ${user.photoURL}");
+        debugPrint("AuthService LOG: User authenticated: ${user.email}, photoURL: ${user.photoURL}");
       }
 
       return user;
     } on FirebaseAuthException catch (e) {
-      print("AuthService ERROR: FirebaseAuthException Code: ${e.code}");
+      debugPrint("AuthService ERROR: FirebaseAuthException Code: ${e.code}");
       throw _handleFirebaseError(e);
     } catch (e) {
-      print("AuthService ERROR: Generic error during sign-in: ${e.toString()}");
+      debugPrint("AuthService ERROR: Generic error during sign-in: ${e.toString()}");
       throw "Google Sign-In failed: ${e.toString()}";
     }
   }
@@ -111,7 +112,7 @@ class AuthService {
   Future<void> updateUserProfile(String displayName) async {
     final user = _auth.currentUser;
     if (user == null) {
-      print("AuthService LOG: No user signed in for profile update");
+      debugPrint("AuthService LOG: No user signed in for profile update");
       throw "No user signed in";
     }
 
@@ -123,11 +124,11 @@ class AuthService {
         'lastUpdated': DateTime.now().toIso8601String(),
         'photoURL': user.photoURL ?? 'assets/user1.png', // Preserve photoURL
       }).catchError((e) {
-        print("Firestore update error: $e");
+        debugPrint("Firestore update error: $e");
       });
-      print("AuthService LOG: Profile updated: ${user.email}, displayName: $displayName");
+      debugPrint("AuthService LOG: Profile updated: ${user.email}, displayName: $displayName");
     } catch (e) {
-      print("AuthService ERROR: Profile update failed: $e");
+      debugPrint("AuthService ERROR: Profile update failed: $e");
       throw "Profile update failed: ${e.toString()}";
     }
   }
@@ -136,29 +137,29 @@ class AuthService {
   Future<void> updatePassword(String newPassword) async {
     final user = _auth.currentUser;
     if (user == null) {
-      print("AuthService LOG: No user signed in for password update");
+      debugPrint("AuthService LOG: No user signed in for password update");
       throw "No user signed in";
     }
     await user.updatePassword(newPassword);
-    print("AuthService LOG: Password updated for ${user.email}");
+    debugPrint("AuthService LOG: Password updated for ${user.email}");
   }
 
   // ------------------- SIGN OUT -------------------
   Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
-    print("AuthService LOG: User signed out");
+    debugPrint("AuthService LOG: User signed out");
   }
 
   // ------------------- DUMMY OTP EMAIL FUNCTION -------------------
   Future<void> sendOtpEmail(String email, String otp) async {
-    print("📩 OTP sent to $email: $otp");
+    debugPrint("📩 OTP sent to $email: $otp");
     // Integrate real email service if needed
   }
 
   // ------------------- PASSWORD RESET (by Email) -------------------
   Future<void> resetPasswordByEmail(String email, String newPassword) async {
-    print("🔐 Reset password for $email -> New Password: $newPassword");
+    debugPrint("🔐 Reset password for $email -> New Password: $newPassword");
     // Implement actual password reset logic if needed
   }
 

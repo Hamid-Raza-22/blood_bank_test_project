@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OptionController extends GetxController {
@@ -11,7 +12,7 @@ class OptionController extends GetxController {
   void navigateToNeedBlood() {
     if (isLoggedIn) {
       Get.toNamed('/need');
-      print("OptionController LOG: Navigated to BloodNeededScreen");
+      debugPrint("OptionController LOG: Navigated to BloodNeededScreen");
     } else {
       Get.snackbar('Error', 'Please log in to request blood');
       Get.toNamed('/login');
@@ -22,7 +23,7 @@ class OptionController extends GetxController {
   void navigateToFindDonor() {
     if (isLoggedIn) {
       Get.toNamed('/donors');
-      print("OptionController LOG: Navigated to FindDonorScreen");
+      debugPrint("OptionController LOG: Navigated to FindDonorScreen");
     } else {
       Get.snackbar('Error', 'Please log in to find donors');
       Get.toNamed('/login');
@@ -33,7 +34,7 @@ class OptionController extends GetxController {
   void navigateToHome() {
     if (isLoggedIn) {
       Get.offAllNamed('/home');
-      print("OptionController LOG: Navigated to HomeScreen");
+      debugPrint("OptionController LOG: Navigated to HomeScreen");
     } else {
       Get.snackbar('Error', 'Please log in to continue');
       Get.toNamed('/login');

@@ -28,7 +28,7 @@ class CustomRequestTile extends StatelessWidget {
     return GestureDetector(
       onTap: isDonor
           ? () {
-        print("CustomRequestTile LOG: Donor selected with ID: $donorId");
+        debugPrint("CustomRequestTile LOG: Donor selected with ID: $donorId");
         Get.toNamed('/need', arguments: {'donorId': donorId});
       }
           : null,

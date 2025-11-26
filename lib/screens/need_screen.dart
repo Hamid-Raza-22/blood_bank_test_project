@@ -17,7 +17,7 @@ class BloodNeededScreen extends StatelessWidget {
     SizeConfig().init(context);
     final controller = Get.put(BloodNeededController());
 
-    print("BloodNeededScreen LOG: Initialized with donorId: $donorId");
+    debugPrint("BloodNeededScreen LOG: Initialized with donorId: $donorId");
 
     if (donorId == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -116,17 +116,6 @@ class BloodNeededScreen extends StatelessWidget {
           ),
         ),
         bottomNavigationBar: const CustomBottomNavBar(),
-        floatingActionButton: FloatingActionButton(
-          shape: const CircleBorder(),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Center button tapped")),
-            );
-          },
-          backgroundColor: const Color(0xFF8B0000),
-          child: Icon(FontAwesomeIcons.plus, size: SizeConfig.blockWidth * 8, color: Colors.white),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }

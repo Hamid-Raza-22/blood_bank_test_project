@@ -30,9 +30,9 @@ class BloodNeededController extends GetxController {
     final args = Get.arguments;
     if (args != null && args is Map && args.containsKey('donorId') && args['donorId'] != null) {
       donorId = args['donorId'].toString();
-      print("BloodNeededController: Donor selected → ID: $donorId");
+      debugPrint("BloodNeededController: Donor selected → ID: $donorId");
     } else {
-      print("BloodNeededController: No donorId received! Arguments: $args");
+      debugPrint("BloodNeededController: No donorId received! Arguments: $args");
       Get.snackbar("Error", "Please select a donor first!", backgroundColor: Colors.red);
       Future.delayed(const Duration(milliseconds: 500), () {
         Get.back(); // Close form if no donor selected
@@ -115,7 +115,7 @@ class BloodNeededController extends GetxController {
       Get.offAllNamed('/home');
 
     } catch (e) {
-      print("Submit Request Error: $e");
+      debugPrint("Submit Request Error: $e");
       Get.snackbar("Error", "Failed to send request", backgroundColor: Colors.red);
     } finally {
       isLoading.value = false;
