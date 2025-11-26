@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
-import '../constant/colors.dart';
-import '../constant/size_helper.dart';
-import '../onboarding/onboarding_screens/onboarding_screen1.dart';
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 5), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    });
-  }
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import '../../constant/colors.dart';
+import '../../constant/size_helper.dart';
+import '../controller/splash_controller.dart';
+class SplashView extends StatelessWidget {
+  const SplashView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(SplashController()); // ✅ Initialize Controller
+    SizeConfig().init(context);
+
     return Scaffold(
       backgroundColor: AppColors.primary, // 🔹 Dark Red Background
       body: Center(
@@ -39,13 +26,11 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               const TextSpan(text: "D"),
               const TextSpan(text: "O"),
-
               const TextSpan(text: "N"),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
-
                 child: Icon(
-                  Icons.bloodtype, // Blood drop icon
+                  FontAwesomeIcons.droplet, // 🩸 Blood drop icon
                   color: Colors.red,
                   size: SizeConfig.blockWidth * 10,
                 ),

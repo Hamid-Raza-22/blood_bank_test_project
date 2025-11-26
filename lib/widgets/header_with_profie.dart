@@ -41,39 +41,43 @@ class CustomProfileHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // 🔹 Left: Avatar + Name + UserID
-              Row(
-                children: [
-                  CircleAvatar(
-
-                    radius: SizeConfig.blockWidth * 6,
-                    backgroundImage: NetworkImage(avatarUrl),
-                  ),
-                  SizedBox(width: SizeConfig.blockWidth * 3),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: SizeConfig.blockWidth * 4.5,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Expanded(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: SizeConfig.blockWidth * 6,
+                      backgroundImage: NetworkImage(avatarUrl),
+                    ),
+                    SizedBox(width: SizeConfig.blockWidth * 3),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: SizeConfig.blockWidth * 4.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: SizeConfig.blockHeight * 0.5),
+                          Text(
+                            userId,
+                            style: TextStyle(
+                              color: AppColors.white.withOpacity(0.8),
+                              fontSize: SizeConfig.blockWidth * 3.5,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: SizeConfig.blockHeight * 0.5),
-                      Text(
-                        userId,
-                        style: TextStyle(
-                          color: AppColors.white.withOpacity(0.8),
-                          fontSize: SizeConfig.blockWidth * 3.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
 
               // 🔹 Right: Two Icons

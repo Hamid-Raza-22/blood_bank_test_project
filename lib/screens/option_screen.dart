@@ -1,10 +1,12 @@
 import 'package:blood_bank_test_project/screens/need_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../constant/size_helper.dart';
+import '../controller/option_controller.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_card.dart';
 import '../widgets/top_header.dart';
-import 'find_donor_screen.dart';
+import 'donor_screen.dart';
 import 'home_screen.dart';
 
 class OptionScreen extends StatelessWidget {
@@ -12,6 +14,12 @@ class OptionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize GetX controller
+    final OptionController controller = Get.put(OptionController());
+
+    // Initialize SizeConfig
+    SizeConfig().init(context);
+
     return Scaffold(
       body: Column(
         children: [
@@ -20,21 +28,27 @@ class OptionScreen extends StatelessWidget {
 
           SizedBox(height: SizeConfig.blockHeight * 3),
 
-          // 🔹 Two Cards in a Row
+          // 🔹 Two Cards (Need Blood / Find Donor)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children:  [
+              children: [
+                // Card for Needing Blood
                 CustomCard(
                   icon: Icons.clean_hands_outlined,
-                  text: "Need ",
-                  onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>BloodNeededScreen()));},
+                  text: "Need Blood",
+                  onTap: () {
+                    controller.navigateToNeedBlood();
+                  },
                 ),
+                // Card for Finding Donor
                 CustomCard(
                   icon: Icons.bloodtype_rounded,
-                  text: "Donor",
-                  onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>FindDonorScreen()));},
+                  text: "Find Donor",
+                  onTap: () {
+                    controller.navigateToFindDonor();
+                  },
                 ),
               ],
             ),
@@ -48,10 +62,10 @@ class OptionScreen extends StatelessWidget {
             child: CustomButton(
               text: "Next",
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+                controller.navigateToHome();
               },
             ),
-          )
+          ),
         ],
       ),
     );

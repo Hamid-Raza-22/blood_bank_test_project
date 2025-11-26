@@ -10,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
+  final IconData? icon;
   final TextEditingController? controller;
 
 
@@ -19,7 +20,7 @@ class CustomTextField extends StatelessWidget {
     required this.hint,
     this.obscureText = false,
     this.suffixIcon,
-    this.controller, this.prefixIcon,
+    this.controller, this.prefixIcon, this.icon,
   });
 
   @override

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-
 import '../constant/colors.dart';
 import '../constant/size_helper.dart';
 
 class CustomCenterProfileHeader extends StatelessWidget {
-  final String title; // Name
-  final String userId; // User ID
-  final String avatarUrl; // Profile Image URL
+  final String title; // Name, nullable
+  final String userId; // User ID, nullable
+  final String avatarUrl; // Profile Image URL (http or asset path)
   final bool showBack;
   final VoidCallback? onBackTap;
   final VoidCallback? onEditTap;
@@ -32,7 +31,7 @@ class CustomCenterProfileHeader extends StatelessWidget {
         bottom: SizeConfig.blockHeight * 4,
       ),
       decoration: const BoxDecoration(
-        color: AppColors.primary, // dark red
+        color: AppColors.primary, // dark red (0xFF8B0000)
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
@@ -58,7 +57,9 @@ class CustomCenterProfileHeader extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: SizeConfig.blockWidth * 8,
-                  backgroundImage: NetworkImage(avatarUrl),
+                  backgroundImage: avatarUrl.startsWith('http')
+                      ? NetworkImage(avatarUrl)
+                      : AssetImage(avatarUrl) as ImageProvider,
                 ),
                 SizedBox(height: SizeConfig.blockHeight * 1),
                 Text(

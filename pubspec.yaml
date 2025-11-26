@@ -39,7 +39,7 @@ dependencies:
   intl_phone_number_input: ^0.7.5 # For international phone number input and validation.
   get: ^4.7.2 # For state management, dependency injection, and route management.
   flutter_svg: ^2.2.1 # To render SVG files in Flutter.
-
+  mailer: ^6.1.0
   # Firebase Packages
   firebase_core: ^4.1.1 # Required to use any Firebase service.
   firebase_auth: ^6.1.0 # For user authentication (email, Google, Facebook, etc.).
@@ -48,9 +48,13 @@ dependencies:
   firebase_messaging: ^16.0.2 # For push notifications.
   cloud_functions: ^6.0.2 # To run backend code in response to events triggered by Firebase features.
   firebase_remote_config: ^6.0.2 # To change app behavior and appearance without publishing an update.
+  firebase_storage: ^13.0.2
+  google_maps_flutter: ^2.5.3
+  location: ^5.0.3
+  geocoding: ^3.0.0
 
   # Other Utility Packages
-  google_sign_in: ^7.2.0 # To implement Google Sign-In.
+  google_sign_in: ^6.2.1 # To implement Google Sign-In.
   flutter_secure_storage: ^9.2.4 # For secure data storage (e.g., tokens).
   shared_preferences: ^2.5.3 # For storing simple key-value data.
   url_launcher: ^6.3.2 # To launch URLs in a mobile browser.
@@ -69,9 +73,11 @@ dependencies:
   infinite_scroll_pagination: ^5.1.1 # To implement paginated lists that load more items as you scroll.
   image_picker: ^1.2.0 # To pick images from the device's camera or gallery.
   gal: ^2.3.2 # To save images and videos to the device gallery.
-  rxdart: ^0.28.0 # Adds reactive programming capabilities to Dart.
+  #rxdart: ^0.28.0 # Adds reactive programming capabilities to Dart.
   lottie: ^3.3.2 # To render Lottie animations (JSON-based animations).
   emoji_picker_flutter: ^4.3.0 # A customizable emoji picker widget.
+  http: ^1.2.0
+
 
 
 dev_dependencies:

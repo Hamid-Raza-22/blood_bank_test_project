@@ -6,9 +6,10 @@ import '../constant/size_helper.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color color;
   final Color textColor;
+
 
   const CustomButton({
     super.key,

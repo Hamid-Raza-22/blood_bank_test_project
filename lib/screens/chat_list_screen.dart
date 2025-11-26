@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
 import 'dummy_chat_screen.dart';
@@ -163,15 +164,19 @@ class ChatScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: primaryRed,
-        shape: CircleBorder(),
-        onPressed: () {},
-        child: const Icon(Icons.add, color: Colors.white),
+        shape: const CircleBorder(),
+        onPressed: (){},
+        backgroundColor: const Color(0xFF8B0000),
+        child: Icon(
+          FontAwesomeIcons.plus,
+          size: SizeConfig.blockWidth * 8,
+          color: Colors.white,
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 0,
-        onTap: (index) {},
+        // currentIndex: 0,
+        // onTap: (index) {},
       ),
     );
   }

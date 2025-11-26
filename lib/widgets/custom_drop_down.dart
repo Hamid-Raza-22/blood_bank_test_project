@@ -1,30 +1,53 @@
-// 📌 new
+
 import 'package:flutter/material.dart';
 
-class CustomDropdown extends StatelessWidget {
-  final int value;
-  final ValueChanged<int?> onChanged;
+class CustomDropdown<T> extends StatelessWidget {
+  final String label;
+  final T? value;
+  final List<T> items;
+  final void Function(T?)? onChanged;
 
   const CustomDropdown({
     super.key,
+    required this.label,
     required this.value,
+     required this.items,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<int>(
-      value: value,
-      items: List.generate(10, (index) {
-        int number = index + 1;
-        return DropdownMenuItem(
-
-          value: number,
-          child: Text(number.toString()),
-        );
-      }),
-      onChanged: onChanged,
-
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<T>(
+          value: value,
+          items: items.map((T value) {
+            return DropdownMenuItem<T>(
+              value: value,
+              child: Text(value.toString()),
+            );
+          }).toList(),
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

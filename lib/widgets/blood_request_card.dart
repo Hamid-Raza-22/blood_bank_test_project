@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../constant/size_helper.dart';
 
 class BloodRequestCard extends StatelessWidget {
@@ -23,16 +22,13 @@ class BloodRequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 2),
       padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          )
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -42,7 +38,7 @@ class BloodRequestCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: SizeConfig.blockWidth * 4,
-                backgroundColor: Color(0xFF8B0000),
+                backgroundColor: const Color(0xFF8B0000),
                 child: Text(
                   bloodType,
                   style: TextStyle(
@@ -91,11 +87,9 @@ class BloodRequestCard extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8B0000),
                     padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text("Accept",style: TextStyle(color: Colors.white),),
+                  child: const Text("Accept", style: TextStyle(color: Colors.white)),
                 ),
               ),
               SizedBox(width: SizeConfig.blockWidth * 4),
@@ -104,15 +98,13 @@ class BloodRequestCard extends StatelessWidget {
                   onPressed: onDecline,
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: const Text("Decline"),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

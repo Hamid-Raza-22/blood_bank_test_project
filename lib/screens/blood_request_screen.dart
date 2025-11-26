@@ -1,106 +1,102 @@
-import 'package:blood_bank_test_project/screens/blood_instruction_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/Get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
 import '../widgets/blood_request_card.dart';
-import 'notification_screen.dart';
 
-class BloodRequestScreen extends StatefulWidget {
+class BloodRequestScreen extends StatelessWidget {
   const BloodRequestScreen({super.key});
 
-  @override
-  State<BloodRequestScreen> createState() => _BloodRequestScreenState();
-}
+  void _updateRequestStatus(String requestId, String status) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(requestId)
+          .update({'status': status});
 
-class _BloodRequestScreenState extends State<BloodRequestScreen> {
-
-  void _onItemTapped(int index) {
+      Get.snackbar(
+        status == 'accepted' ? 'Accepted' : 'Declined',
+        status == 'accepted'
+            ? 'You have accepted the blood request.'
+            : 'You have declined the request.',
+        backgroundColor: status == 'accepted' ? Colors.green : Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update: $e',
+          backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
+
   @override
   Widget build(BuildContext context) {
-    SizeConfig().init(context); // Initialize SizeConfig
-
-    final List<Map<String, String>> requests = [
-      {
-        "bloodType": "A+",
-        "title": "Emergency A+ Blood Needed",
-        "hospital": "Better Life Hospital",
-        "date": "12 Sep 2024"
-      },
-      {
-        "bloodType": "B+",
-        "title": "Emergency B+ Blood Needed",
-        "hospital": "Better Life Hospital",
-        "date": "12 Sep 2024"
-      },
-      {
-        "bloodType": "AB+",
-        "title": "Emergency AB+ Blood Needed",
-        "hospital": "Better Life Hospital",
-        "date": "12 Sep 2024"
-      },
-      {
-        "bloodType": "O+",
-        "title": "Emergency O+ Blood Needed",
-        "hospital": "Better Life Hospital",
-        "date": "12 Sep 2024"
-      },
-    ];
+    SizeConfig().init(context);
+    final User? user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("Blood Request"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationScreen()));},
-          )
-        ],
+        title: const Text("Blood Requests"),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-        child: ListView.builder(
-          itemCount: requests.length,
-          itemBuilder: (context, index) {
-            final request = requests[index];
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 1),
-              child: BloodRequestCard(
-                bloodType: request["bloodType"]!,
-                title: request["title"]!,
-                hospital: request["hospital"]!,
-                date: request["date"]!,
-                onAccept: () {},
-                onDecline: () {},
-              ),
+      body: SafeArea(
+        child: user == null
+            ? const Center(child: Text('Please log in to view requests'))
+            : StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('requests')
+              .where('requestToUid',
+              isEqualTo: FirebaseAuth.instance.currentUser!.uid) // صرف یہی
+              .where('status', isEqualTo: 'pending')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error loading requests'));
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final requests = snapshot.data?.docs ?? [];
+
+            if (requests.isEmpty) {
+              return const Center(
+                child: Text(
+                  "No pending blood requests",
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+              itemCount: requests.length,
+              itemBuilder: (context, index) {
+                final data = requests[index].data() as Map<String, dynamic>;
+                final requestId = requests[index].id;
+
+                return BloodRequestCard(
+                  bloodType: data['bloodType'] ?? 'N/A',
+                  title: data['patientName'] ?? 'Unknown Patient',
+                  hospital: data['hospital'] ?? 'Unknown Hospital',
+                  date: data['date'] ?? 'N/A',
+                  onAccept: () => _updateRequestStatus(requestId, 'accepted'),
+                  onDecline: () => _updateRequestStatus(requestId, 'declined'),
+                );
+              },
             );
           },
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 0,
-        onTap: _onItemTapped,
-        // Connect with your controller
-      ),
-      floatingActionButton: FloatingActionButton(
-        shape: CircleBorder(),
-        backgroundColor: const Color(0xFF8B0000),
-        onPressed: () {},
-        child: Icon(
-          Icons.add,
-          size: SizeConfig.blockWidth * 8,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 }

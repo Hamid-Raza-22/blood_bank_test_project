@@ -1,116 +1,132 @@
-import 'package:blood_bank_test_project/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/Get.dart';
 import '../bottom_navigation/bottom_navigation_bar.dart';
-import '../widgets/custom_app_bar.dart';
-import '../widgets/custom_text_field.dart';
-import '../widgets/custom_button.dart';
 import '../constant/size_helper.dart';
-import 'notification_screen.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/custom_drop_down.dart';
+import '../widgets/custom_text_field.dart';
+import '../controller/blood_needed_controller.dart';
 
-class BloodNeededScreen extends StatefulWidget {
+class BloodNeededScreen extends StatelessWidget {
   const BloodNeededScreen({super.key});
 
   @override
-  State<BloodNeededScreen> createState() => _BloodNeededScreenState();
-}
-
-class _BloodNeededScreenState extends State<BloodNeededScreen> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController bloodTypeController = TextEditingController();
-  final TextEditingController hospitalController = TextEditingController();
-  final TextEditingController diseaseController = TextEditingController();
-  final TextEditingController contactController = TextEditingController();
-  final TextEditingController unitsController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-
-  void _onItemTapped(int index) {
-    // handle bottom nav tap
-  }
-
-  void _submitRequest() {
-    // handle form submission
-    print("Blood request submitted:");
-    print("Name: ${nameController.text}");
-    print("Blood Type: ${bloodTypeController.text}");
-    print("Hospital: ${hospitalController.text}");
-    print("City: ${diseaseController.text}");
-    print("Contact: ${contactController.text}");
-    print("Units: ${unitsController.text}");
-    print("Date: ${dateController.text}");
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final String? donorId = Get.arguments?['donorId']; // donorId from arguments
     SizeConfig().init(context);
+    final controller = Get.put(BloodNeededController());
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: CustomAppBar(title: 'Needed Blood',
-       onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));},
+    print("BloodNeededScreen LOG: Initialized with donorId: $donorId");
 
+    if (donorId == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.snackbar('Error', 'No donor selected', backgroundColor: Colors.red, colorText: Colors.white);
+        Get.back();
+      });
+    }
+
+    return SafeArea(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          title: const Text("Request Blood"),
+          backgroundColor: Colors.white,
+          elevation: 0,
         ),
-
-
-      body: Padding(
-        padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-        child: SingleChildScrollView(
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextField(
-                controller: nameController,
-                label: 'Patient Name', hint: 'Enter Patient Name',
+                label: "Patient Name",
+                hint: "Enter patient name",
+                controller: controller.patientNameController,
+                icon: FontAwesomeIcons.person,
               ),
               SizedBox(height: SizeConfig.blockHeight * 2),
               CustomTextField(
-                controller: bloodTypeController,
-                label: 'Blood Type', hint: 'select blood type',
+                label: "Age",
+                hint: "Enter patient age",
+                controller: controller.ageController,
               ),
               SizedBox(height: SizeConfig.blockHeight * 2),
               CustomTextField(
-                controller: hospitalController,
-                 label: 'Age', hint: 'Enter patient age',
+                label: "Disease",
+                hint: "Enter disease",
+                controller: controller.diseaseController,
               ),
               SizedBox(height: SizeConfig.blockHeight * 2),
               CustomTextField(
-                controller: diseaseController,
-                 label: 'Disease Name', hint: 'Enter disease name',
+                label: "Contact",
+                hint: "Enter contact number",
+                controller: controller.contactController,
               ),
               SizedBox(height: SizeConfig.blockHeight * 2),
               CustomTextField(
-                controller: contactController,
-                 label: '', hint: '',
+                label: "Hospital",
+                hint: "Enter hospital name",
+                controller: controller.hospitalController,
               ),
               SizedBox(height: SizeConfig.blockHeight * 2),
               CustomTextField(
-                controller: unitsController,
-                label: 'Location', hint: 'location',
-                suffixIcon:Icon(Icons.location_on_rounded),
+                label: "Location",
+                hint: "Enter location",
+                controller: controller.locationController,
+                icon: FontAwesomeIcons.locationDot,
               ),
-
+              SizedBox(height: SizeConfig.blockHeight * 2),
+              Obx(
+                    () => CustomDropdown<String>(
+                  label: "Blood Group",
+                  value: controller.selectedBloodType.value.isEmpty ? null : controller.selectedBloodType.value,
+                  items: const ['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-'],
+                  onChanged: (value) {
+                    if (value != null) controller.setBloodType(value);
+                  },
+                ),
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 2),
+              Obx(
+                    () => CustomDropdown<int>(
+                  label: "Units",
+                  value: controller.units.value == 0 ? null : controller.units.value,
+                  onChanged: (value) {
+                    if (value != null) controller.setUnits(value);
+                  },
+                  items: [1, 2, 3, 4, 5],
+                ),
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 2),
+              CustomTextField(
+                label: "Date Needed",
+                hint: "YYYY-MM-DD",
+                controller: controller.dateController,
+                icon: Icons.calendar_today,
+              ),
               SizedBox(height: SizeConfig.blockHeight * 3),
               CustomButton(
                 text: "Submit Request",
-                onPressed: _submitRequest,
-                color: const Color(0xFF8B0000),
-                textColor: Colors.white,
+                onPressed: controller.isLoading.value
+                    ? null
+                    : () => controller.submitRequest(), // Bas yeh line change kar do
               ),
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        shape: CircleBorder(),
-        backgroundColor: const Color(0xFF8B0000),
-        onPressed: () {
-          // handle FAB action
-        },
-        child: const Icon(Icons.add, color: Colors.white,
+        bottomNavigationBar: const CustomBottomNavBar(),
+        floatingActionButton: FloatingActionButton(
+          shape: const CircleBorder(),
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Center button tapped")),
+            );
+          },
+          backgroundColor: const Color(0xFF8B0000),
+          child: Icon(FontAwesomeIcons.plus, size: SizeConfig.blockWidth * 8, color: Colors.white),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 0,
-        onTap: _onItemTapped,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }

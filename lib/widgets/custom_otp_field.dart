@@ -6,7 +6,7 @@ class CustomOtpField extends StatefulWidget {
 
   const CustomOtpField({
     super.key,
-    this.length = 6,
+    this.length = 4,
     required this.onCompleted,
   });
 

@@ -1,15 +1,16 @@
-import 'package:blood_bank_test_project/screens/signup_screen.dart';
-import 'package:blood_bank_test_project/widgets/custom_divider.dart';
 import 'package:flutter/material.dart';
-
-import '../constant/colors.dart';
-import '../constant/size_helper.dart';
-import '../widgets/custom_button.dart';
-import '../widgets/custom_text_field.dart';
-import '../widgets/social_button.dart';
-import '../widgets/top_header.dart';
+import 'package:get/get.dart';
+import '../../constant/colors.dart';
+import '../../constant/size_helper.dart';
+import '../../widgets/custom_button.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/custom_divider.dart';
+import '../../widgets/social_button.dart';
+import '../../widgets/top_header.dart';
+import '../bottom_navigation/bottom_navigation_bar.dart';
+import '../controller/auth_controller.dart';
+import 'signup_screen.dart';
 import 'forget_password_screen.dart';
-import 'option_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -19,165 +20,182 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final AuthController controller = Get.find();
+
   bool rememberMe = false;
+  bool isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 🔴 Top Header
-            // ✅ Reusable Header
-            const CustomHeader(title: "Log In",showBack: true,),
+    SizeConfig().init(context);
 
-            SizedBox(height: SizeConfig.blockHeight * 3),
+    return SafeArea(
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // 🔹 Reusable Custom Header
+              const CustomHeader(title: "Log In", showBack: false),
 
-            // 📝 Form Fields
-            Padding(
-              padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Text(
-                      "Welcome Back!",
-                      style: TextStyle(
-                        fontSize: SizeConfig.blockWidth * 5,
-                        fontWeight: FontWeight.bold,
+              SizedBox(height: SizeConfig.blockHeight * 3),
+
+              Padding(
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        "Welcome Back!",
+                        style: TextStyle(
+                          fontSize: SizeConfig.blockWidth * 5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: SizeConfig.blockHeight * 0.5),
-                  const Center(
-                    child: Text(
-                      "Let's login for explore continues" ,
-                      style: TextStyle(color: AppColors.grey),
+                    SizedBox(height: SizeConfig.blockHeight * 1),
+                    const Center(
+                      child: Text(
+                        "Let's login to continue exploring",
+                        style: TextStyle(color: AppColors.grey),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: SizeConfig.blockHeight * 3),
+                    SizedBox(height: SizeConfig.blockHeight * 3),
 
-                  const CustomTextField(
-                    label: "Email",
-                    hint: "example@gmail.com",
-                  ),
-                  CustomTextField(
-                    label: "Password",
-                    hint: "********",
-                    obscureText: true,
-                    suffixIcon: Icon(Icons.visibility_off,
-                        color: AppColors.primary),
-                  ),
+                    // 🔹 Email Field
+                    CustomTextField(
+                      label: "Email",
+                      hint: "example@gmail.com",
+                      controller: emailController,
+                    ),
 
-                  SizedBox(height: SizeConfig.blockHeight * 1.5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Remember Me
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: rememberMe,
-                            activeColor: AppColors.primary,
-                            onChanged: (value) {
-                              setState(() {
-                                rememberMe = value ?? false;
-                              });
-                            },
-                          ),
-                          Text(
-                            "Remember Me",
+                    // 🔹 Password Field with Toggle
+                    CustomTextField(
+                      label: "Password",
+                      hint: "********",
+                      controller: passwordController,
+                      obscureText: !isPasswordVisible,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordVisible = !isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+
+                    SizedBox(height: SizeConfig.blockHeight * 1.5),
+
+                    // 🔹 Remember & Forgot Password
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: rememberMe,
+                              activeColor: AppColors.primary,
+                              onChanged: (v) =>
+                                  setState(() => rememberMe = v ?? false),
+                            ),
+                            Text(
+                              "Remember Me",
+                              style: TextStyle(
+                                fontSize: SizeConfig.blockWidth * 3.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              Get.to(() => const ForgetPasswordScreen()),
+                          child: const Text(
+                            "Forgot Password?",
                             style: TextStyle(
-                              fontSize: SizeConfig.blockWidth * 3.5,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
 
-                      // Forgot Password
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                const ForgetPasswordScreen()),
-                          );
-                        },
-                        child: Text(
-                          "Forgot Password?",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: SizeConfig.blockWidth * 3.5,
-                            fontWeight: FontWeight.bold,
+                    // 🔹 Login Button
+                    Obx(() => CustomButton(
+                      text: controller.isLoading.value
+                          ? "Signing In..."
+                          : "Sign In",
+                      onPressed: () {
+                        controller.signIn(
+                          emailController.text.trim(),
+                          passwordController.text.trim(),
+                        );
+                      },
+                    )),
+
+                    SizedBox(height: SizeConfig.blockHeight * 4),
+
+                    // 🔹 OR Divider
+                    const CustomDivider(text: "or"),
+
+                    SizedBox(height: SizeConfig.blockHeight * 3),
+
+                    // 🔹 Social Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SocialButton(
+                          assetPath: "assets/icons/google.png",
+                          onPressed: () {
+                            controller.signInWithGoogle(isSignUp: false); // Pass isSignUp: false
+                          },
+                        ),
+                        SocialButton(
+                          assetPath: "assets/icons/facebook.png",
+                          onPressed: () {},
+                        ),
+                        SocialButton(
+                          assetPath: "assets/icons/apple.png",
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: SizeConfig.blockHeight * 3),
+
+                    // 🔹 Bottom Text
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Don’t have an account? "),
+                        GestureDetector(
+                          onTap: () => Get.to(() => const SignUpScreen()),
+                          child: const Text(
+                            "Sign Up",
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  CustomButton(
-                    text: "Sign In",
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>OptionScreen()));
-                    },
-                  ),
-
-                  SizedBox(height: SizeConfig.blockHeight * 4),
-
-                  // --- OR Divider ---
-                 CustomDivider(text: "or"),
-
-                  SizedBox(height: SizeConfig.blockHeight * 3),
-
-                  // 🌐 Social Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      SocialButton(
-                        assetPath: "assets/icons/google.png",
-                        onPressed: () {},
-                      ),
-                      SocialButton(
-                        assetPath: "assets/icons/facebook.png",
-                        onPressed: () {},
-                      ),
-                      SocialButton(
-                        assetPath: "assets/icons/apple.png",
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: SizeConfig.blockHeight * 3),
-
-                  // Navigation to Sign Up
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Don’t have an account? "),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const SignUpScreen()),
-                          );
-                        },
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+
     );
-  }}
+  }
+}
