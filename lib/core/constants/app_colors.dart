@@ -31,6 +31,12 @@ class AppColors {
   static const Color bloodTypeB = Color(0xFF1E88E5);
   static const Color bloodTypeAB = Color(0xFF8E24AA);
   static const Color bloodTypeO = Color(0xFF43A047);
+  
+  // Blood Type Color Aliases
+  static const Color bloodA = bloodTypeA;
+  static const Color bloodB = bloodTypeB;
+  static const Color bloodAB = bloodTypeAB;
+  static const Color bloodO = bloodTypeO;
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(

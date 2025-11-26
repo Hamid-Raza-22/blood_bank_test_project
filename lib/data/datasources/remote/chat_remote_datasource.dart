@@ -93,6 +93,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final messagesCollection = _chatRoomsCollection.doc(chatRoomId).collection('messages');
       
       final docRef = await messagesCollection.add({
+        'chatRoomId': chatRoomId,
         'senderId': senderId,
         'senderName': senderName,
         'message': message,
@@ -105,7 +106,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       await _chatRoomsCollection.doc(chatRoomId).update({
         'lastMessage': message,
         'lastMessageTime': FieldValue.serverTimestamp(),
-        'lastSenderId': senderId,
+        'lastMessageSenderId': senderId,
       });
 
       final doc = await docRef.get();
@@ -174,11 +175,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         .snapshots()
         .map((snapshot) {
       final messages = snapshot.docs.map((doc) => _messageFromDoc(doc)).toList();
-      // Sort client-side by timestamp
+      // Sort client-side by createdAt
       messages.sort((a, b) {
-        if (a.timestamp == null) return 1;
-        if (b.timestamp == null) return -1;
-        return a.timestamp!.compareTo(b.timestamp!);
+        if (a.createdAt == null) return 1;
+        if (b.createdAt == null) return -1;
+        return a.createdAt!.compareTo(b.createdAt!);
       });
       return messages;
     });
@@ -191,7 +192,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       participants: List<String>.from(data['participants'] ?? []),
       lastMessage: data['lastMessage'],
       lastMessageTime: (data['lastMessageTime'] as Timestamp?)?.toDate(),
-      lastSenderId: data['lastSenderId'],
+      lastMessageSenderId: data['lastMessageSenderId'],
       needId: data['needId'],
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
     );
@@ -201,12 +202,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     final data = doc.data() as Map<String, dynamic>;
     return MessageEntity(
       id: doc.id,
+      chatRoomId: data['chatRoomId'] ?? '',
       senderId: data['senderId'] ?? '',
       senderName: data['senderName'] ?? '',
       message: data['message'] ?? '',
       type: data['type'] ?? 'text',
+      imageUrl: data['imageUrl'],
       isRead: data['isRead'] ?? false,
-      timestamp: (data['timestamp'] as Timestamp?)?.toDate(),
+      createdAt: (data['timestamp'] as Timestamp?)?.toDate(),
     );
   }
 }

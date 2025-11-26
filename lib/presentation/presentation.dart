@@ -10,3 +10,4 @@ export 'features/chat/viewmodel/chat_viewmodel.dart';
 export 'features/donors/viewmodel/donor_viewmodel.dart';
 export 'features/notifications/viewmodel/notification_viewmodel.dart';
 export 'features/public_needs/viewmodel/public_need_viewmodel.dart';
+export 'features/profile/viewmodel/profile_viewmodel.dart';

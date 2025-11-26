@@ -19,8 +19,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Core
-import 'core/constants/app_colors.dart';
 import 'core/di/injection_container.dart';
+import 'core/theme/app_theme.dart';
 
 // Legacy Controllers (for backward compatibility during migration)
 import 'controller/auth_controller.dart';
@@ -94,11 +94,20 @@ void main() async {
     await Get.putAsync(() => NotificationService().init(), permanent: true);
   }
 
+  // Check onboarding and auth status (can be used for dynamic routing)
   final prefs = await SharedPreferences.getInstance();
-  final bool onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-  final User? user = FirebaseAuth.instance.currentUser;
+  final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+  final currentUser = FirebaseAuth.instance.currentUser;
 
-  String initialRoute = '/splash';
+  // Determine initial route based on auth state
+  String initialRoute;
+  if (!onboardingCompleted) {
+    initialRoute = '/splash';
+  } else if (currentUser != null) {
+    initialRoute = '/home';
+  } else {
+    initialRoute = '/login';
+  }
   runApp(MyApp(initialRoute: initialRoute));
 }
 
@@ -133,13 +142,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/bloodInstruction', page: () => const BloodInstructionScreen()),
         GetPage(name: '/alldonors', page: () => const AllDonorsScreen()),
       ],
-      theme: ThemeData(
-        primaryColor: AppColors.primary,
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: AppColors.primary,
-          secondary: AppColors.grey,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
     );
   }
 }

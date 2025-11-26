@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
-import '../../core/di/injection_container.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../domain/repositories/donor_repository.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../../domain/repositories/public_need_repository.dart';
+import '../../domain/repositories/user_repository.dart';
 import '../../domain/usecases/auth/login_usecase.dart';
 import '../../domain/usecases/auth/signup_usecase.dart';
 import '../../domain/usecases/auth/google_signin_usecase.dart';
@@ -15,6 +15,7 @@ import '../features/chat/viewmodel/chat_viewmodel.dart';
 import '../features/donors/viewmodel/donor_viewmodel.dart';
 import '../features/notifications/viewmodel/notification_viewmodel.dart';
 import '../features/public_needs/viewmodel/public_need_viewmodel.dart';
+import '../features/profile/viewmodel/profile_viewmodel.dart';
 
 /// Initial binding - called when app starts
 class InitialBinding extends Bindings {
@@ -109,6 +110,20 @@ class PublicNeedBinding extends Bindings {
         notificationRepository: Get.find<NotificationRepository>(),
         currentUserId: currentUserId,
         currentUserName: currentUserName,
+      ),
+    );
+  }
+}
+
+/// Profile binding
+class ProfileBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<ProfileViewModel>(
+      () => ProfileViewModel(
+        authRepository: Get.find<AuthRepository>(),
+        userRepository: Get.find<UserRepository>(),
+        donorRepository: Get.find<DonorRepository>(),
       ),
     );
   }

@@ -2,18 +2,24 @@
 class ChatRoomEntity {
   final String id;
   final List<String> participants;
+  final Map<String, String>? participantNames;
+  final Map<String, String>? participantPhotos;
   final String? lastMessage;
   final DateTime? lastMessageTime;
-  final String? lastSenderId;
+  final String? lastMessageSenderId;
+  final Map<String, int>? unreadCount;
   final String? needId;
   final DateTime? createdAt;
 
   const ChatRoomEntity({
     required this.id,
     required this.participants,
+    this.participantNames,
+    this.participantPhotos,
     this.lastMessage,
     this.lastMessageTime,
-    this.lastSenderId,
+    this.lastMessageSenderId,
+    this.unreadCount,
     this.needId,
     this.createdAt,
   });
@@ -30,18 +36,24 @@ class ChatRoomEntity {
   ChatRoomEntity copyWith({
     String? id,
     List<String>? participants,
+    Map<String, String>? participantNames,
+    Map<String, String>? participantPhotos,
     String? lastMessage,
     DateTime? lastMessageTime,
-    String? lastSenderId,
+    String? lastMessageSenderId,
+    Map<String, int>? unreadCount,
     String? needId,
     DateTime? createdAt,
   }) {
     return ChatRoomEntity(
       id: id ?? this.id,
       participants: participants ?? this.participants,
+      participantNames: participantNames ?? this.participantNames,
+      participantPhotos: participantPhotos ?? this.participantPhotos,
       lastMessage: lastMessage ?? this.lastMessage,
       lastMessageTime: lastMessageTime ?? this.lastMessageTime,
-      lastSenderId: lastSenderId ?? this.lastSenderId,
+      lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
+      unreadCount: unreadCount ?? this.unreadCount,
       needId: needId ?? this.needId,
       createdAt: createdAt ?? this.createdAt,
     );

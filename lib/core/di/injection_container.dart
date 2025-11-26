@@ -28,11 +28,26 @@ import '../../domain/repositories/chat_repository.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../../domain/repositories/public_need_repository.dart';
 
-// Use Cases
+// Use Cases - Auth
 import '../../domain/usecases/auth/login_usecase.dart';
 import '../../domain/usecases/auth/signup_usecase.dart';
 import '../../domain/usecases/auth/google_signin_usecase.dart';
 import '../../domain/usecases/auth/logout_usecase.dart';
+
+// Use Cases - User
+import '../../domain/usecases/user/get_user_usecase.dart';
+
+// Use Cases - Donor
+import '../../domain/usecases/donor/donor_usecases.dart';
+
+// Use Cases - Chat
+import '../../domain/usecases/chat/chat_usecases.dart';
+
+// Use Cases - Notification
+import '../../domain/usecases/notification/notification_usecases.dart';
+
+// Use Cases - Public Need
+import '../../domain/usecases/public_need/public_need_usecases.dart';
 
 /// Dependency Injection Container
 class InjectionContainer {
@@ -165,6 +180,121 @@ class InjectionContainer {
 
     Get.lazyPut<LogoutUseCase>(
       () => LogoutUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    // User Use Cases
+    Get.lazyPut<GetUserUseCase>(
+      () => GetUserUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<UpdateUserProfileUseCase>(
+      () => UpdateUserProfileUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    // Donor Use Cases
+    Get.lazyPut<GetDonorsByBloodTypeUseCase>(
+      () => GetDonorsByBloodTypeUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<GetDonorsByCityUseCase>(
+      () => GetDonorsByCityUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<RegisterDonorUseCase>(
+      () => RegisterDonorUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<UpdateDonorAvailabilityUseCase>(
+      () => UpdateDonorAvailabilityUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<WatchAvailableDonorsUseCase>(
+      () => WatchAvailableDonorsUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    // Chat Use Cases
+    Get.lazyPut<GetOrCreateChatRoomUseCase>(
+      () => GetOrCreateChatRoomUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<SendMessageUseCase>(
+      () => SendMessageUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<WatchChatRoomsUseCase>(
+      () => WatchChatRoomsUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<WatchMessagesUseCase>(
+      () => WatchMessagesUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<MarkMessagesAsReadUseCase>(
+      () => MarkMessagesAsReadUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    // Notification Use Cases
+    Get.lazyPut<WatchNotificationsUseCase>(
+      () => WatchNotificationsUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<WatchUnreadCountUseCase>(
+      () => WatchUnreadCountUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<MarkNotificationAsReadUseCase>(
+      () => MarkNotificationAsReadUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<MarkAllNotificationsAsReadUseCase>(
+      () => MarkAllNotificationsAsReadUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<SendPushNotificationUseCase>(
+      () => SendPushNotificationUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    // Public Need Use Cases
+    Get.lazyPut<CreatePublicNeedUseCase>(
+      () => CreatePublicNeedUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<AcceptPublicNeedUseCase>(
+      () => AcceptPublicNeedUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<CancelPublicNeedUseCase>(
+      () => CancelPublicNeedUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<WatchPendingNeedsUseCase>(
+      () => WatchPendingNeedsUseCase(repository: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<GetNeedsByBloodTypeUseCase>(
+      () => GetNeedsByBloodTypeUseCase(repository: Get.find()),
       fenix: true,
     );
   }
