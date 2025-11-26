@@ -289,8 +289,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               isDonor: true,
                               donorId: doc.id,
                                 onTap: () {
-                                  Get.toNamed('/request', arguments: {
-                                    'donorId': doc.id   // Bas itna hi bhejo
+                                  Get.toNamed('/need', arguments: {
+                                    'donorId': doc.id,
                                   });
                                 }
 

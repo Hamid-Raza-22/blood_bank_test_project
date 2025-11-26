@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:blood_bank_test_project/screens/email_verification_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' hide Location;
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';

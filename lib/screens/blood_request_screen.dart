@@ -53,9 +53,8 @@ class BloodRequestScreen extends StatelessWidget {
           stream: FirebaseFirestore.instance
               .collection('requests')
               .where('requestToUid',
-              isEqualTo: FirebaseAuth.instance.currentUser!.uid) // صرف یہی
+              isEqualTo: FirebaseAuth.instance.currentUser!.uid)
               .where('status', isEqualTo: 'pending')
-              .orderBy('createdAt', descending: true)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
@@ -65,7 +64,14 @@ class BloodRequestScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
+            // Client-side sorting (no index needed)
             final requests = snapshot.data?.docs ?? [];
+            requests.sort((a, b) {
+              final aTime = (a.data() as Map)['createdAt'] as Timestamp?;
+              final bTime = (b.data() as Map)['createdAt'] as Timestamp?;
+              if (aTime == null || bTime == null) return 0;
+              return bTime.compareTo(aTime); // Descending
+            });
 
             if (requests.isEmpty) {
               return const Center(

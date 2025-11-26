@@ -95,7 +95,7 @@ class AllDonorsScreen extends StatelessWidget {
                     isDonor: true,
                     donorId: doc.id,
                     onTap: () {
-                      Get.toNamed('/request', arguments: {'donorId': doc.id});
+                      Get.toNamed('/need', arguments: {'donorId': doc.id});
                     },
                   );
                 },
