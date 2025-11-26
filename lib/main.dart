@@ -1,33 +1,55 @@
 // main.dart
-import 'package:blood_bank_test_project/onboarding/onboarding_screens/onboarding_screen1.dart';
-import 'package:blood_bank_test_project/screens/all_donors_screen.dart';
-import 'package:blood_bank_test_project/screens/blood_instruction_screen.dart';
-import 'package:blood_bank_test_project/screens/blood_request_screen.dart';
-import 'package:blood_bank_test_project/screens/chat_list_screen.dart';
-import 'package:blood_bank_test_project/screens/chat_screen.dart';
-import 'package:blood_bank_test_project/screens/public_need_screen.dart';
-import 'package:blood_bank_test_project/screens/notification_screen.dart';
+// ============================================================================
+// BLOOD BANK APP - MVVM + DDD ARCHITECTURE
+// ============================================================================
+// 
+// Architecture Overview:
+// ├── core/           -> Constants, Utils, DI, Errors
+// ├── data/           -> DataSources, Models (DTOs), Repository Implementations
+// ├── domain/         -> Entities, Repository Interfaces, Use Cases
+// └── presentation/   -> Features (View + ViewModel), Common Widgets, Routes
+//
+// ============================================================================
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:blood_bank_test_project/screens/splash_screen.dart';
-import 'package:blood_bank_test_project/screens/login_screen.dart';
-import 'package:blood_bank_test_project/screens/signup_screen.dart';
-import 'package:blood_bank_test_project/screens/email_verification_screen.dart';
-import 'package:blood_bank_test_project/screens/forget_password_screen.dart';
-import 'package:blood_bank_test_project/screens/home_screen.dart';
-import 'package:blood_bank_test_project/screens/donor_screen.dart';
-import 'package:blood_bank_test_project/screens/need_screen.dart';
-import 'package:blood_bank_test_project/screens/profile_screen.dart';
-import 'package:blood_bank_test_project/screens/option_screen.dart';
-import 'package:blood_bank_test_project/controller/auth_controller.dart';
-import 'package:blood_bank_test_project/controller/home_controller.dart';
-import 'package:blood_bank_test_project/controller/request_controller.dart';
-import 'package:blood_bank_test_project/controller/bottom_nav_controller.dart';
-import 'package:blood_bank_test_project/services/notification_service.dart';
-import 'package:flutter/foundation.dart';
+
+// Core
+import 'core/constants/app_colors.dart';
+import 'core/di/injection_container.dart';
+
+// Legacy Controllers (for backward compatibility during migration)
+import 'controller/auth_controller.dart';
+import 'controller/home_controller.dart';
+import 'controller/request_controller.dart';
+import 'controller/bottom_nav_controller.dart';
+
+// Services
+import 'services/notification_service.dart';
+
+// Screens (Legacy - will be moved to presentation/features)
+import 'onboarding/onboarding_screens/onboarding_screen1.dart';
+import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
+import 'screens/email_verification_screen.dart';
+import 'screens/forget_password_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/donor_screen.dart';
+import 'screens/need_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/option_screen.dart';
+import 'screens/all_donors_screen.dart';
+import 'screens/blood_instruction_screen.dart';
+import 'screens/blood_request_screen.dart';
+import 'screens/chat_list_screen.dart';
+import 'screens/chat_screen.dart';
+import 'screens/public_need_screen.dart';
+import 'screens/notification_screen.dart';
 
 // === WEB FIREBASE CONFIG ===
 const firebaseConfig = {
@@ -42,6 +64,7 @@ const firebaseConfig = {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: FirebaseOptions(
@@ -57,7 +80,10 @@ void main() async {
     await Firebase.initializeApp();
   }
 
-  // Initialize ALL controllers once
+  // Initialize Dependency Injection Container (MVVM + DDD)
+  await sl.init();
+
+  // Initialize Legacy Controllers (for backward compatibility)
   Get.put(AuthController(), permanent: true);
   Get.put(NavController(), permanent: true);
   Get.put(HomeController(), permanent: true);
@@ -108,10 +134,10 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/alldonors', page: () => const AllDonorsScreen()),
       ],
       theme: ThemeData(
-        primaryColor: const Color(0xFF8B0000),
+        primaryColor: AppColors.primary,
         colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: const Color(0xFF8B0000),
-          secondary: Colors.grey[600],
+          primary: AppColors.primary,
+          secondary: AppColors.grey,
         ),
       ),
     );
