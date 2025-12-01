@@ -8,6 +8,14 @@ import 'package:get/get.dart';
 class NavController extends GetxController {
   RxInt currentIndex = 0.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    // Always start at home tab (index 0)
+    currentIndex.value = 0;
+    debugPrint("NavController LOG: Initialized with home tab (index 0)");
+  }
+
   /// Change tab - only updates index, no navigation needed
   /// MainNavigationScreen's IndexedStack handles the page switch
   void changeTab(int index) {
@@ -19,7 +27,8 @@ class NavController extends GetxController {
 
   /// Reset to home tab
   void goToHome() {
-    changeTab(0);
+    currentIndex.value = 0;
+    debugPrint("NavController LOG: Reset to home tab");
   }
 
   /// Navigate to main screen with specific tab

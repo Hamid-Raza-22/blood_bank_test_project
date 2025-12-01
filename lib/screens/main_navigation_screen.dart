@@ -11,13 +11,29 @@ import 'profile_screen.dart';
 /// 
 /// This screen keeps the bottom navbar static and uses IndexedStack
 /// to switch between different tab contents without rebuilding navbar.
-class MainNavigationScreen extends StatelessWidget {
+class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final NavController navController = Get.find<NavController>();
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
 
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  late final NavController navController;
+
+  @override
+  void initState() {
+    super.initState();
+    navController = Get.find<NavController>();
+    // Always reset to home tab when MainNavigationScreen is created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navController.goToHome();
+      debugPrint("MainNavigationScreen: Reset to home tab");
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // List of screens for each tab
     final List<Widget> screens = [
       const HomeScreenContent(),    // Index 0: Home

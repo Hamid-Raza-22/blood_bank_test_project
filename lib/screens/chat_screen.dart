@@ -30,6 +30,44 @@ class _ChatScreenState extends State<ChatScreen> {
     otherUserId = args?['otherUserId'] ?? '';
     otherUserName = args?['otherUserName'] ?? 'User';
     otherUserPhoto = args?['otherUserPhoto'] ?? '';
+    
+    // Mark messages as read when chat opens
+    _markMessagesAsRead();
+  }
+  
+  /// Mark all unread messages from other user as read
+  Future<void> _markMessagesAsRead() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || chatRoomId.isEmpty) return;
+    
+    try {
+      // Get all unread messages from other user
+      final unreadMessages = await _firestore
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .where('read', isEqualTo: false)
+          .get();
+      
+      final batch = _firestore.batch();
+      int count = 0;
+      
+      for (var doc in unreadMessages.docs) {
+        final data = doc.data();
+        // Only mark messages from OTHER user as read
+        if (data['senderId'] != user.uid) {
+          batch.update(doc.reference, {'read': true});
+          count++;
+        }
+      }
+      
+      if (count > 0) {
+        await batch.commit();
+        debugPrint('ChatScreen: Marked $count messages as read in $chatRoomId');
+      }
+    } catch (e) {
+      debugPrint('ChatScreen ERROR: Failed to mark messages as read: $e');
+    }
   }
 
   @override

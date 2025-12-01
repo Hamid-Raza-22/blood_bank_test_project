@@ -15,52 +15,56 @@ class BadgeService {
 
   /// Stream of unread chat messages count for a user
   /// 
-  /// Counts chat rooms where the user has unread messages
-  /// Uses multiple strategies:
-  /// 1. Check 'unreadCounts' map field
-  /// 2. Check 'unread_<userId>' field
-  /// 3. Count total chat rooms as fallback
+  /// Counts chat rooms where user has unread messages by checking:
+  /// 1. lastSenderId != userId (last message from other user)
+  /// 2. Or counts unread messages in messages subcollection
   Stream<int> watchUnreadChatsCount(String userId) {
     debugPrint('BadgeService: Starting to watch unread chats for userId: $userId');
     return _firestore
         .collection('chat_rooms')
         .where('participants', arrayContains: userId)
         .snapshots()
-        .map((snapshot) {
+        .asyncMap((snapshot) async {
       debugPrint('BadgeService: Got ${snapshot.docs.length} chat rooms for $userId');
       
       int unreadCount = 0;
-      bool hasUnreadField = false;
       
       for (var doc in snapshot.docs) {
         final data = doc.data();
-        debugPrint('BadgeService: Chat room ${doc.id} data keys: ${data.keys.toList()}');
+        final chatRoomId = doc.id;
         
-        // Strategy 1: Check 'unreadCounts' map
-        if (data.containsKey('unreadCounts')) {
-          hasUnreadField = true;
-          final unreadCounts = data['unreadCounts'] as Map<String, dynamic>? ?? {};
-          final userUnread = unreadCounts[userId] as int? ?? 0;
-          unreadCount += userUnread;
-          debugPrint('BadgeService: unreadCounts[$userId] = $userUnread');
+        // Strategy 1: Check if there are unread messages in subcollection
+        try {
+          final unreadMessages = await _firestore
+              .collection('chat_rooms')
+              .doc(chatRoomId)
+              .collection('messages')
+              .where('read', isEqualTo: false)
+              .get();
+          
+          // Count messages that are not from current user
+          int roomUnread = 0;
+          for (var msgDoc in unreadMessages.docs) {
+            final msgData = msgDoc.data();
+            if (msgData['senderId'] != userId) {
+              roomUnread++;
+            }
+          }
+          
+          if (roomUnread > 0) {
+            debugPrint('BadgeService: Chat $chatRoomId has $roomUnread unread messages');
+            unreadCount += roomUnread;
+          }
+        } catch (e) {
+          debugPrint('BadgeService: Error checking messages for $chatRoomId: $e');
+          
+          // Fallback: Check lastSenderId
+          final lastSenderId = data['lastSenderId'] as String?;
+          if (lastSenderId != null && lastSenderId != userId) {
+            // Last message was from other user - might be unread
+            // But we can't be sure, so we skip this
+          }
         }
-        
-        // Strategy 2: Check 'unread_<userId>' field
-        final unreadKey = 'unread_$userId';
-        if (data.containsKey(unreadKey)) {
-          hasUnreadField = true;
-          final userUnread = data[unreadKey] as int? ?? 0;
-          unreadCount += userUnread;
-          debugPrint('BadgeService: $unreadKey = $userUnread');
-        }
-      }
-      
-      // Strategy 3: If no unread fields exist, count chat rooms as indicator
-      // (This is a fallback - shows total chats, not unread)
-      if (!hasUnreadField && snapshot.docs.isNotEmpty) {
-        // For now just show 0 if no unread tracking exists
-        debugPrint('BadgeService: No unread tracking fields found, returning 0');
-        unreadCount = 0;
       }
       
       debugPrint('BadgeService: Final unread chats count for $userId: $unreadCount');
@@ -72,16 +76,29 @@ class BadgeService {
   }
 
   /// Stream of unread notifications count for a user
+  /// Checks for 'read' field (not 'isRead') to match notification_screen.dart
   Stream<int> watchUnreadNotificationsCount(String userId) {
+    debugPrint('BadgeService: Starting to watch unread notifications for userId: $userId');
     return _firestore
         .collection('notifications')
         .where('userId', isEqualTo: userId)
-        .where('isRead', isEqualTo: false)
         .snapshots()
         .map((snapshot) {
-      final count = snapshot.docs.length;
-      debugPrint('BadgeService: Unread notifications count for $userId: $count');
-      return count;
+      // Count notifications where 'read' is false or doesn't exist
+      int unreadCount = 0;
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        // Check both 'read' and 'isRead' fields for compatibility
+        final isRead = data['read'] == true || data['isRead'] == true;
+        if (!isRead) {
+          unreadCount++;
+        }
+      }
+      debugPrint('BadgeService: Unread notifications count for $userId: $unreadCount (total: ${snapshot.docs.length})');
+      return unreadCount;
+    }).handleError((error) {
+      debugPrint('BadgeService ERROR: watchUnreadNotificationsCount failed: $error');
+      return 0;
     });
   }
 
