@@ -4,6 +4,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Services
+import '../../services/session_service.dart';
+
 // Data Sources
 import '../../data/datasources/remote/auth_remote_datasource.dart';
 import '../../data/datasources/remote/user_remote_datasource.dart';
@@ -79,6 +82,12 @@ class InjectionContainer {
     // SharedPreferences
     final sharedPreferences = await SharedPreferences.getInstance();
     Get.lazyPut<SharedPreferences>(() => sharedPreferences, fenix: true);
+
+    // Session Service - for persistent login
+    Get.put<SessionService>(
+      SessionService(firebaseAuth: Get.find<FirebaseAuth>()),
+      permanent: true,
+    );
   }
 
   void _initDataSources() {

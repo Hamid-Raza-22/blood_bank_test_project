@@ -1,9 +1,9 @@
-import 'package:blood_bank_test_project/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../constant/colors.dart';
 import '../../constant/size_helper.dart';
-import '../../screens/signup_screen.dart';
+import '../../controller/onboarding_controller.dart';
 import '../../widgets/custom_button.dart';
 
 class FourthOnboardingPage extends StatelessWidget {
@@ -20,6 +20,9 @@ class FourthOnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the onboarding controller to save completion state
+    final controller = Get.find<OnboardingController>();
+    
     return Padding(
       padding: EdgeInsets.all(SizeConfig.blockWidth * 6),
       child: Column(
@@ -42,23 +45,19 @@ class FourthOnboardingPage extends StatelessWidget {
           ),
           SizedBox(height: SizeConfig.blockHeight * 5),
 
-          // ✅ Buttons
+          // Buttons - now properly save onboarding completion
           CustomButton(
             text: "Sign Up",
             color: AppColors.primary,
             textColor: Colors.white,
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()));
-            },
+            onPressed: () => controller.goToSignup(),
           ),
           SizedBox(height: SizeConfig.blockHeight * 2),
           CustomButton(
             text: "Login",
             color: Colors.white,
             textColor: AppColors.primary,
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
-            },
+            onPressed: () => controller.goToLogin(),
           ),
         ],
       ),

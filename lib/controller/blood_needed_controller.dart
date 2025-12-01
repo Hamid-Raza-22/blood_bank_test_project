@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../services/fcm_service.dart';
 
 class BloodNeededController extends GetxController {
   // Text Controllers
@@ -91,12 +92,13 @@ class BloodNeededController extends GetxController {
       }
 
       // Send request – most important field: requestToUid
-      await FirebaseFirestore.instance.collection('requests').add({
+      final docRef = await FirebaseFirestore.instance.collection('requests').add({
         'donorId': donorId,
         'donorUserId': donorUserId,
         'requestToUid': donorUserId,          // This ensures only this donor sees it
         'requesterId': user.uid,
         'requesterName': user.displayName ?? "Anonymous",
+        'requesterPhoto': user.photoURL ?? "",
         'patientName': patientNameController.text.trim(),
         'age': ageController.text.trim(),
         'disease': diseaseController.text.trim(),
@@ -110,6 +112,14 @@ class BloodNeededController extends GetxController {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
+      // Send notification to the specific donor
+      await _sendRequestNotification(
+        donorUserId: donorUserId!,
+        requestId: docRef.id,
+        requesterName: user.displayName ?? "Someone",
+        bloodType: selectedBloodType.value,
+      );
+
       Get.snackbar("Success", "Blood request sent successfully!", backgroundColor: Colors.green);
       clearForm();
       Get.offAllNamed('/home');
@@ -119,6 +129,53 @@ class BloodNeededController extends GetxController {
       Get.snackbar("Error", "Failed to send request", backgroundColor: Colors.red);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Send notification to the donor about new blood request
+  Future<void> _sendRequestNotification({
+    required String donorUserId,
+    required String requestId,
+    required String requesterName,
+    required String bloodType,
+  }) async {
+    try {
+      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+      
+      // Get donor's FCM token
+      final donorDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(donorUserId)
+          .get();
+      
+      final fcmToken = donorDoc.data()?['fcmToken'] as String?;
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await FCMService.sendNotification(
+          senderName: 'Blood Request 🩸',
+          fcmToken: fcmToken,
+          msg: '$requesterName needs $bloodType blood. Please help!',
+          senderId: currentUserId,
+          receiverId: donorUserId,
+          type: 'blood_request',
+          extraData: {
+            'requestId': requestId,
+            'bloodType': bloodType,
+          },
+        );
+      }
+      
+      // Also store in Firestore for in-app notifications
+      await FirebaseFirestore.instance.collection('notifications').add({
+        'userId': donorUserId,
+        'type': 'blood_request',
+        'requestId': requestId,
+        'title': 'New Blood Request',
+        'body': '$requesterName needs $bloodType blood',
+        'isRead': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint("Error sending request notification: $e");
     }
   }
 

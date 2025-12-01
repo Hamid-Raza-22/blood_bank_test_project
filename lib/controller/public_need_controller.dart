@@ -180,7 +180,7 @@ class PublicNeedController extends GetxController {
     }
   }
 
-  // Create chat room between two users
+  // Create or get existing chat room between two users (ONE chat per user pair)
   Future<String> _createChatRoom({
     required String needId,
     required String requesterId,
@@ -191,17 +191,17 @@ class PublicNeedController extends GetxController {
     required String acceptorPhoto,
     required String bloodType,
   }) async {
-    // Create unique chat room ID
+    // Create deterministic chat room ID (same users = same chat room, regardless of request)
     final List<String> ids = [requesterId, acceptorId]..sort();
-    final chatRoomId = '${ids[0]}_${ids[1]}_$needId';
+    final chatRoomId = '${ids[0]}_${ids[1]}';
 
-    // Check if chat room already exists
+    // Check if chat room already exists between these users
     final existingRoom = await _firestore.collection('chat_rooms').doc(chatRoomId).get();
     
     if (!existingRoom.exists) {
+      // Create new chat room
       await _firestore.collection('chat_rooms').doc(chatRoomId).set({
         'chatRoomId': chatRoomId,
-        'needId': needId,
         'participants': [requesterId, acceptorId],
         'participantNames': {
           requesterId: requesterName,
@@ -211,7 +211,6 @@ class PublicNeedController extends GetxController {
           requesterId: requesterPhoto,
           acceptorId: acceptorPhoto,
         },
-        'bloodType': bloodType,
         'lastMessage': 'Request accepted! Start chatting...',
         'lastMessageTime': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
@@ -227,6 +226,24 @@ class PublicNeedController extends GetxController {
         'message': '$acceptorName accepted the blood request for $bloodType.',
         'type': 'system',
         'timestamp': FieldValue.serverTimestamp(),
+      });
+    } else {
+      // Chat room exists - just add a message about the new accepted request
+      await _firestore
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .add({
+        'senderId': 'system',
+        'message': '$acceptorName accepted another blood request for $bloodType.',
+        'type': 'system',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      
+      // Update last message
+      await _firestore.collection('chat_rooms').doc(chatRoomId).update({
+        'lastMessage': 'New request accepted',
+        'lastMessageTime': FieldValue.serverTimestamp(),
       });
     }
 

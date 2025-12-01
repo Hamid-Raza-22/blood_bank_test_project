@@ -4,10 +4,13 @@
 // ============================================================================
 // 
 // Architecture Overview:
-// ├── core/           -> Constants, Utils, DI, Errors
+// ├── core/           -> Constants, Utils, DI, Errors, Theme
 // ├── data/           -> DataSources, Models (DTOs), Repository Implementations
 // ├── domain/         -> Entities, Repository Interfaces, Use Cases
-// └── presentation/   -> Features (View + ViewModel), Common Widgets, Routes
+// └── presentation/   -> Features (View + ViewModel), Common Widgets, Routes, Bindings
+//
+// Flow:
+// main() -> Firebase Init -> DI Init -> AppBinding -> Splash -> Auth Check -> Option/Login
 //
 // ============================================================================
 
@@ -15,12 +18,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Core
 import 'core/di/injection_container.dart';
 import 'core/theme/app_theme.dart';
+
+// Presentation - Routes & Bindings
+import 'presentation/routes/app_routes.dart';
+import 'presentation/bindings/app_bindings.dart';
 
 // Legacy Controllers (for backward compatibility during migration)
 import 'controller/auth_controller.dart';
@@ -30,26 +35,6 @@ import 'controller/bottom_nav_controller.dart';
 
 // Services
 import 'services/notification_service.dart';
-
-// Screens (Legacy - will be moved to presentation/features)
-import 'onboarding/onboarding_screens/onboarding_screen1.dart';
-import 'screens/splash_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/signup_screen.dart';
-import 'screens/email_verification_screen.dart';
-import 'screens/forget_password_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/donor_screen.dart';
-import 'screens/need_screen.dart';
-import 'screens/profile_screen.dart';
-import 'screens/option_screen.dart';
-import 'screens/all_donors_screen.dart';
-import 'screens/blood_instruction_screen.dart';
-import 'screens/blood_request_screen.dart';
-import 'screens/chat_list_screen.dart';
-import 'screens/chat_screen.dart';
-import 'screens/public_need_screen.dart';
-import 'screens/notification_screen.dart';
 
 // === WEB FIREBASE CONFIG ===
 const firebaseConfig = {
@@ -65,6 +50,25 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
+  await _initializeFirebase();
+
+  // Initialize Dependency Injection Container (MVVM + DDD)
+  await sl.init();
+
+  // Initialize Legacy Controllers (for backward compatibility)
+  _initializeLegacyControllers();
+
+  // Initialize notification service (not on web)
+  if (!kIsWeb) {
+    await Get.putAsync(() => NotificationService().init(), permanent: true);
+  }
+
+  // Run app - Splash screen will handle auth state check and navigation
+  runApp(const BloodBankApp());
+}
+
+/// Initialize Firebase based on platform
+Future<void> _initializeFirebase() async {
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: FirebaseOptions(
@@ -79,70 +83,48 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
+}
 
-  // Initialize Dependency Injection Container (MVVM + DDD)
-  await sl.init();
-
-  // Initialize Legacy Controllers (for backward compatibility)
+/// Initialize legacy controllers for backward compatibility
+void _initializeLegacyControllers() {
   Get.put(AuthController(), permanent: true);
   Get.put(NavController(), permanent: true);
   Get.put(HomeController(), permanent: true);
   Get.put(RequestController(), permanent: true);
-
-  // Initialize notification service (not on web)
-  if (!kIsWeb) {
-    await Get.putAsync(() => NotificationService().init(), permanent: true);
-  }
-
-  // Check onboarding and auth status (can be used for dynamic routing)
-  final prefs = await SharedPreferences.getInstance();
-  final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-  final currentUser = FirebaseAuth.instance.currentUser;
-
-  // Determine initial route based on auth state
-  String initialRoute;
-  if (!onboardingCompleted) {
-    initialRoute = '/splash';
-  } else if (currentUser != null) {
-    initialRoute = '/home';
-  } else {
-    initialRoute = '/login';
-  }
-  runApp(MyApp(initialRoute: initialRoute));
 }
 
-class MyApp extends StatelessWidget {
-  final String initialRoute;
-  const MyApp({super.key, required this.initialRoute});
+/// Main App Widget with MVVM Architecture
+class BloodBankApp extends StatelessWidget {
+  const BloodBankApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      // App Configuration
       debugShowCheckedModeBanner: false,
       title: 'Blood Bank App',
-      initialRoute: initialRoute,
-      getPages: [
-        GetPage(name: '/splash', page: () => const SplashView()),
-        GetPage(name: '/onboarding', page: () => const OnboardingView()),
-        GetPage(name: '/login', page: () => const SignInScreen()),
-        GetPage(name: '/signup', page: () => const SignUpScreen()),
-        GetPage(name: '/verifyOtp', page: () => const VerifyOtpScreen()),
-        GetPage(name: '/verifyResetOtp', page: () => const VerifyOtpScreen()),
-        GetPage(name: '/resetPassword', page: () => const ForgetPasswordScreen()),
-        GetPage(name: '/option', page: () => const OptionScreen()),
-        GetPage(name: '/home', page: () => const HomeScreen()),
-        GetPage(name: '/donors', page: () => const DonorScreen()),
-        GetPage(name: '/need', page: () => const BloodNeededScreen()),
-        GetPage(name: '/profile', page: () => const ProfileScreen()),
-        GetPage(name: '/request', page: () => const BloodRequestScreen()),
-        GetPage(name: '/notifications', page: () => const NotificationScreen()),
-        GetPage(name: '/chatList', page: () => const ChatListScreen()),
-        GetPage(name: '/chat', page: () => const ChatScreen()),
-        GetPage(name: '/publicNeed', page: () => const PublicNeedScreen()),
-        GetPage(name: '/bloodInstruction', page: () => const BloodInstructionScreen()),
-        GetPage(name: '/alldonors', page: () => const AllDonorsScreen()),
-      ],
+
+      // Theme
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.light,
+
+      // Initial Binding - Initializes core ViewModels
+      initialBinding: AppBinding(),
+
+      // Initial Route - Splash handles auth check
+      initialRoute: AppRoutes.splash,
+
+      // Centralized Routes with Bindings
+      getPages: AppPages.pages,
+
+      // Default Transition
+      defaultTransition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 300),
+
+      // Locale settings (can be expanded)
+      locale: const Locale('en', 'US'),
+      fallbackLocale: const Locale('en', 'US'),
     );
   }
 }

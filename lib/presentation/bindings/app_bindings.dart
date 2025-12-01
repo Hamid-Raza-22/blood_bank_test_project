@@ -10,6 +10,7 @@ import '../../domain/usecases/auth/signup_usecase.dart';
 import '../../domain/usecases/auth/google_signin_usecase.dart';
 import '../../domain/usecases/auth/logout_usecase.dart';
 import '../features/auth/viewmodel/auth_viewmodel.dart';
+import '../features/splash/viewmodel/splash_viewmodel.dart';
 import '../features/home/viewmodel/home_viewmodel.dart';
 import '../features/chat/viewmodel/chat_viewmodel.dart';
 import '../features/donors/viewmodel/donor_viewmodel.dart';
@@ -17,21 +18,62 @@ import '../features/notifications/viewmodel/notification_viewmodel.dart';
 import '../features/public_needs/viewmodel/public_need_viewmodel.dart';
 import '../features/profile/viewmodel/profile_viewmodel.dart';
 
-/// Initial binding - called when app starts
-class InitialBinding extends Bindings {
+/// App-wide binding - initializes core ViewModels that persist across screens
+class AppBinding extends Bindings {
   @override
   void dependencies() {
-    // Auth ViewModel
-    Get.lazyPut<AuthViewModel>(
-      () => AuthViewModel(
+    // Auth ViewModel - persistent across app lifecycle
+    Get.put<AuthViewModel>(
+      AuthViewModel(
         authRepository: Get.find<AuthRepository>(),
         loginUseCase: Get.find<LoginUseCase>(),
         signupUseCase: Get.find<SignupUseCase>(),
         googleSignInUseCase: Get.find<GoogleSignInUseCase>(),
         logoutUseCase: Get.find<LogoutUseCase>(),
       ),
-      fenix: true,
+      permanent: true,
     );
+  }
+}
+
+/// Splash binding - for initial app state check
+class SplashBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<SplashViewModel>(
+      () => SplashViewModel(
+        authRepository: Get.find<AuthRepository>(),
+      ),
+    );
+  }
+}
+
+/// Auth binding - for login/signup screens
+class AuthBinding extends Bindings {
+  @override
+  void dependencies() {
+    // AuthViewModel is already initialized in AppBinding
+    // This ensures it's available if accessed before AppBinding runs
+    if (!Get.isRegistered<AuthViewModel>()) {
+      Get.lazyPut<AuthViewModel>(
+        () => AuthViewModel(
+          authRepository: Get.find<AuthRepository>(),
+          loginUseCase: Get.find<LoginUseCase>(),
+          signupUseCase: Get.find<SignupUseCase>(),
+          googleSignInUseCase: Get.find<GoogleSignInUseCase>(),
+          logoutUseCase: Get.find<LogoutUseCase>(),
+        ),
+        fenix: true,
+      );
+    }
+  }
+}
+
+/// Initial binding - alias for backward compatibility
+class InitialBinding extends Bindings {
+  @override
+  void dependencies() {
+    AuthBinding().dependencies();
   }
 }
 

@@ -9,12 +9,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:location/location.dart';
 import 'package:blood_bank_test_project/constant/colors.dart';
 import '../services/firebase_auth_service.dart';
+import '../services/session_service.dart';
+import '../presentation/routes/app_routes.dart';
 
+/// Legacy AuthController - uses SessionService for persistent login
+/// 
+/// Note: New code should use AuthViewModel instead.
+/// This controller is maintained for backward compatibility.
 class AuthController extends GetxController {
   static AuthController get to => Get.find();
 
   final AuthService _service = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final SessionService _sessionService;
   var isLoading = false.obs;
   var firebaseUser = Rxn<User>();
   var generatedOtp = ''.obs;
@@ -23,6 +30,12 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Initialize SessionService - may not be available yet during startup
+    if (Get.isRegistered<SessionService>()) {
+      _sessionService = Get.find<SessionService>();
+    } else {
+      _sessionService = SessionService();
+    }
     firebaseUser.bindStream(FirebaseAuth.instance.authStateChanges());
     debugPrint("AuthController LOG: Binding auth state changes");
   }
@@ -129,8 +142,14 @@ class AuthController extends GetxController {
         debugPrint("AuthController LOG: Sign-in successful: ${user.email}, Location: $city");
         // Save FCM token for notifications
         await _saveFcmToken(user.uid);
+        // Save session for persistent login using secure storage
+        await _sessionService.saveSession(
+          userId: user.uid,
+          email: email,
+          authProvider: 'email',
+        );
         Get.snackbar("Success", "Logged in successfully in $city!");
-        Get.offAllNamed('/profile');
+        Get.offAllNamed(AppRoutes.option);
       } else {
         debugPrint("AuthController LOG: Sign-in failed, user is null");
         Get.snackbar("Error", "Sign-in failed.");
@@ -214,8 +233,14 @@ class AuthController extends GetxController {
         debugPrint("AuthController LOG: Google Sign-In successful: ${user.email}, Location: $city");
         // Save FCM token for notifications
         await _saveFcmToken(user.uid);
+        // Save session for persistent login using secure storage
+        await _sessionService.saveSession(
+          userId: user.uid,
+          email: user.email ?? '',
+          authProvider: 'google',
+        );
         Get.snackbar("Success", isSignUp ? "Signed up with Google in $city!" : "Signed in with Google in $city!");
-        Get.offAllNamed('/option');
+        Get.offAllNamed(AppRoutes.option);
       } else {
         debugPrint("AuthController LOG: Google Sign-In failed, user is null");
         Get.snackbar("Error", "Google Sign-In failed.");
@@ -258,7 +283,9 @@ class AuthController extends GetxController {
   // Sign Out
   Future<void> signOut() async {
     await _service.signOut();
-    Get.offAllNamed('/login');
+    // Clear session from secure storage
+    await _sessionService.clearSession();
+    Get.offAllNamed(AppRoutes.login);
     debugPrint("AuthController LOG: Signed out");
   }
 

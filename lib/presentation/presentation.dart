@@ -4,6 +4,7 @@ export 'bindings/app_bindings.dart';
 export 'routes/app_routes.dart';
 
 // ViewModels
+export 'features/splash/viewmodel/splash_viewmodel.dart';
 export 'features/auth/viewmodel/auth_viewmodel.dart';
 export 'features/home/viewmodel/home_viewmodel.dart';
 export 'features/chat/viewmodel/chat_viewmodel.dart';

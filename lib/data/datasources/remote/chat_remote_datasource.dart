@@ -68,20 +68,26 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<ChatRoomEntity> getOrCreateChatRoom(String userId1, String userId2, String? needId) async {
     try {
+      // Create deterministic chat room ID (same users = same chat room)
+      final List<String> ids = [userId1, userId2]..sort();
+      final chatRoomId = '${ids[0]}_${ids[1]}';
+
       // Check if chat room already exists
-      final query = await _chatRoomsCollection
-          .where('participants', arrayContains: userId1)
-          .get();
+      final existingDoc = await _chatRoomsCollection.doc(chatRoomId).get();
       
-      for (var doc in query.docs) {
-        final participants = List<String>.from(doc['participants'] ?? []);
-        if (participants.contains(userId2)) {
-          return _chatRoomFromDoc(doc);
-        }
+      if (existingDoc.exists) {
+        return _chatRoomFromDoc(existingDoc);
       }
 
-      // Create new chat room
-      return createChatRoom([userId1, userId2], needId);
+      // Create new chat room with deterministic ID
+      await _chatRoomsCollection.doc(chatRoomId).set({
+        'participants': [userId1, userId2],
+        'needId': needId,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      
+      final doc = await _chatRoomsCollection.doc(chatRoomId).get();
+      return _chatRoomFromDoc(doc);
     } catch (e) {
       throw ServerException(message: e.toString());
     }

@@ -5,14 +5,21 @@ import '../../../../domain/usecases/auth/login_usecase.dart';
 import '../../../../domain/usecases/auth/signup_usecase.dart';
 import '../../../../domain/usecases/auth/google_signin_usecase.dart';
 import '../../../../domain/usecases/auth/logout_usecase.dart';
+import '../../../../services/session_service.dart';
+import '../../../routes/app_routes.dart';
 
 /// Auth ViewModel - handles authentication state and logic
+/// 
+/// Uses SessionService for persistent login:
+/// - Saves session securely after successful login
+/// - Clears session on logout
 class AuthViewModel extends GetxController {
   final AuthRepository _authRepository;
   final LoginUseCase _loginUseCase;
   final SignupUseCase _signupUseCase;
   final GoogleSignInUseCase _googleSignInUseCase;
   final LogoutUseCase _logoutUseCase;
+  final SessionService _sessionService;
 
   AuthViewModel({
     required AuthRepository authRepository,
@@ -20,11 +27,13 @@ class AuthViewModel extends GetxController {
     required SignupUseCase signupUseCase,
     required GoogleSignInUseCase googleSignInUseCase,
     required LogoutUseCase logoutUseCase,
+    SessionService? sessionService,
   })  : _authRepository = authRepository,
         _loginUseCase = loginUseCase,
         _signupUseCase = signupUseCase,
         _googleSignInUseCase = googleSignInUseCase,
-        _logoutUseCase = logoutUseCase;
+        _logoutUseCase = logoutUseCase,
+        _sessionService = sessionService ?? Get.find<SessionService>();
 
   // Observable states
   final _isLoading = false.obs;
@@ -81,9 +90,15 @@ class AuthViewModel extends GetxController {
     _isLoading.value = false;
 
     return result.fold(
-      onSuccess: (user) {
+      onSuccess: (user) async {
+        // Save session for persistent login
+        await _sessionService.saveSession(
+          userId: user.id,
+          email: user.email,
+          authProvider: 'email',
+        );
         _clearFields();
-        Get.offAllNamed('/home');
+        _navigateAfterAuth();
         return true;
       },
       onFailure: (failure) {
@@ -111,9 +126,15 @@ class AuthViewModel extends GetxController {
     _isLoading.value = false;
 
     return result.fold(
-      onSuccess: (user) {
+      onSuccess: (user) async {
+        // Save session for persistent login
+        await _sessionService.saveSession(
+          userId: user.id,
+          email: user.email,
+          authProvider: 'email',
+        );
         _clearFields();
-        Get.offAllNamed('/home');
+        _navigateAfterAuth();
         return true;
       },
       onFailure: (failure) {
@@ -134,8 +155,14 @@ class AuthViewModel extends GetxController {
     _isLoading.value = false;
 
     return result.fold(
-      onSuccess: (user) {
-        Get.offAllNamed('/home');
+      onSuccess: (user) async {
+        // Save session for persistent login
+        await _sessionService.saveSession(
+          userId: user.id,
+          email: user.email,
+          authProvider: 'google',
+        );
+        _navigateAfterAuth();
         return true;
       },
       onFailure: (failure) {
@@ -155,13 +182,20 @@ class AuthViewModel extends GetxController {
     _isLoading.value = false;
 
     result.fold(
-      onSuccess: (_) {
-        Get.offAllNamed('/login');
+      onSuccess: (_) async {
+        // Clear session from secure storage
+        await _sessionService.clearSession();
+        Get.offAllNamed(AppRoutes.login);
       },
       onFailure: (failure) {
         _showError(failure.message);
       },
     );
+  }
+
+  /// Navigate to Option screen after successful authentication
+  void _navigateAfterAuth() {
+    Get.offAllNamed(AppRoutes.option);
   }
 
   /// Send password reset email

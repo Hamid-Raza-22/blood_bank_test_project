@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../screens/login_screen.dart';
-import '../../screens/signup_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../presentation/routes/app_routes.dart';
 
 class OnboardingController extends GetxController {
   // Page controller
@@ -65,12 +65,20 @@ class OnboardingController extends GetxController {
     currentPage.value = index;
   }
 
-  // Navigation from 4th screen
-  void goToLogin() {
-    Get.to(() => const SignInScreen());
+  /// Mark onboarding as completed and save to persistent storage
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
   }
 
-  void goToSignup() {
-    Get.to(() => const SignUpScreen());
+  // Navigation from 4th screen - with persistent storage
+  void goToLogin() async {
+    await _completeOnboarding();
+    Get.offAllNamed(AppRoutes.login);
+  }
+
+  void goToSignup() async {
+    await _completeOnboarding();
+    Get.offAllNamed(AppRoutes.signup);
   }
 }
