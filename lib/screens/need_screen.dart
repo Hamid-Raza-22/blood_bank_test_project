@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/Get.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_drop_down.dart';
@@ -115,7 +114,6 @@ class BloodNeededScreen extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: const CustomBottomNavBar(),
       ),
     );
   }

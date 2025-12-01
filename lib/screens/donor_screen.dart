@@ -1,12 +1,10 @@
 // screens/donor_screen.dart
-import 'package:blood_bank_test_project/screens/blood_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoding/geocoding.dart' hide Location;
 import 'package:get/Get.dart';
 import 'package:location/location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_button.dart';
@@ -15,7 +13,6 @@ import '../widgets/custom_text_field.dart' show CustomTextField;
 import '../widgets/select_group_grid.dart';
 import '../controller/request_controller.dart';
 import '../controller/auth_controller.dart';
-import '../controller/bottom_nav_controller.dart';
 
 class DonorScreen extends StatefulWidget {
   const DonorScreen({super.key});
@@ -31,11 +28,7 @@ class _DonorScreenState extends State<DonorScreen> {
   void initState() {
     super.initState();
     _cityController = TextEditingController();
-    
-    // Set nav index to 1 (Donors)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<NavController>().currentIndex.value = 1;
-    });
+    // Note: Nav index is managed by MainNavigationScreen - no need to set manually
     
     final controller = Get.find<RequestController>();
     _updateCityText(controller.city.value);
@@ -137,7 +130,6 @@ class _DonorScreenState extends State<DonorScreen> {
             ),
           );
         }),
-        bottomNavigationBar: const CustomBottomNavBar(),
       ),
     );
   }

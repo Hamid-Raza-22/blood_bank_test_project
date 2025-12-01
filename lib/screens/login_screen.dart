@@ -7,7 +7,6 @@ import '../../widgets/custom_text_field.dart';
 import '../../widgets/custom_divider.dart';
 import '../../widgets/social_button.dart';
 import '../../widgets/top_header.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../controller/auth_controller.dart';
 import 'signup_screen.dart';
 import 'forget_password_screen.dart';

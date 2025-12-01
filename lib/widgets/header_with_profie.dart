@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../constant/colors.dart';
 import '../constant/size_helper.dart';
+import '../controller/badge_controller.dart';
+import 'badge_widget.dart';
 
 class CustomProfileHeader extends StatelessWidget {
   final String title; // Name
   final String userId; // Subtitle
   final String avatarUrl; // Circular avatar image
   final bool showBack; // Optional back button
-  final VoidCallback? onButtonTap; // Optional top-right button
+  final VoidCallback? onButtonTap; // Optional top-right button (chat)
   final VoidCallback? onNotificationTap; // Optional notification button
 
   const CustomProfileHeader({
@@ -80,18 +83,54 @@ class CustomProfileHeader extends StatelessWidget {
                 ),
               ),
 
-              // 🔹 Right: Two Icons
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.messenger_outline, color: AppColors.white),
-                    onPressed: onButtonTap,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_none, color: AppColors.white),
-                    onPressed: onNotificationTap,
-                  ),
-                ],
+              // 🔹 Right: Two Icons with Badges
+              Builder(
+                builder: (context) {
+                  // Ensure BadgeController is available
+                  if (!Get.isRegistered<BadgeController>()) {
+                    Get.put(BadgeController(), permanent: true);
+                  }
+                  final badgeController = Get.find<BadgeController>();
+                  
+                  return Row(
+                    children: [
+                      // Chat Icon with Badge
+                      Obx(() {
+                        final count = badgeController.unreadChatsCount;
+                        debugPrint("Header: Chat badge count = $count");
+                        return IconButton(
+                          icon: BadgeWidget(
+                            count: count,
+                            topOffset: -2,
+                            rightOffset: -2,
+                            child: const Icon(
+                              Icons.messenger_outline,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          onPressed: onButtonTap,
+                        );
+                      }),
+                      // Notification Icon with Badge
+                      Obx(() {
+                        final count = badgeController.unreadNotificationsCount;
+                        debugPrint("Header: Notification badge count = $count");
+                        return IconButton(
+                          icon: BadgeWidget(
+                            count: count,
+                            topOffset: -2,
+                            rightOffset: -2,
+                            child: const Icon(
+                              Icons.notifications_none,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          onPressed: onNotificationTap,
+                        );
+                      }),
+                    ],
+                  );
+                },
               ),
             ],
           ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
 
 class BloodInstructionScreen extends StatefulWidget {
@@ -139,7 +137,6 @@ class _BloodInstructionScreenState extends State<BloodInstructionScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 }

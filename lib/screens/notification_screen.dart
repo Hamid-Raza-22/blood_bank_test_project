@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
 
 class NotificationScreen extends StatelessWidget {
@@ -125,7 +124,6 @@ class NotificationScreen extends StatelessWidget {
                 );
               },
             ),
-      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 

@@ -3,11 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/colors.dart';
 import '../constant/size_helper.dart';
-import '../controller/bottom_nav_controller.dart';
 import '../controller/public_need_controller.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_drop_down.dart';
@@ -27,10 +24,7 @@ class _PublicNeedScreenState extends State<PublicNeedScreen> {
   void initState() {
     super.initState();
     controller = Get.put(PublicNeedController());
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<NavController>().currentIndex.value = 2;
-    });
+    // Note: Nav index is managed by MainNavigationScreen - no need to set manually
   }
 
   @override
@@ -114,7 +108,6 @@ class _PublicNeedScreenState extends State<PublicNeedScreen> {
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 

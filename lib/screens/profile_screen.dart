@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
-import '../controller/bottom_nav_controller.dart';
 import '../controller/auth_controller.dart';
 import '../widgets/center_image_header.dart';
 
@@ -28,9 +25,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    final NavController navController = Get.find();
-    navController.currentIndex.value = 3;
-    debugPrint("ProfileScreen LOG: initState - Set nav index to 3 (Profile)");
+    // Note: Don't set navController.currentIndex here - it's managed by MainNavigationScreen
+    debugPrint("ProfileScreen LOG: initState");
 
     Future.delayed(const Duration(milliseconds: 500), () {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -378,7 +374,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 }

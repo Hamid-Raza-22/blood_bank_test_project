@@ -2,9 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/size_helper.dart';
-import '../controller/bottom_nav_controller.dart';
 import '../widgets/blood_request_card.dart';
 import '../services/fcm_service.dart';
 
@@ -16,13 +14,7 @@ class BloodRequestScreen extends StatefulWidget {
 }
 
 class _BloodRequestScreenState extends State<BloodRequestScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<NavController>().currentIndex.value = 2;
-    });
-  }
+  // Note: This is a secondary screen - no nav index management needed
 
   void _updateRequestStatus(String requestId, String status, Map<String, dynamic> requestData) async {
     try {
@@ -252,7 +244,6 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
           },
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 }

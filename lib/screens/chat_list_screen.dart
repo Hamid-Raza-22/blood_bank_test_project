@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../bottom_navigation/bottom_navigation_bar.dart';
 import '../constant/colors.dart';
 import '../constant/size_helper.dart';
 
@@ -96,7 +95,6 @@ class ChatListScreen extends StatelessWidget {
                 ],
               ),
             ),
-      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 

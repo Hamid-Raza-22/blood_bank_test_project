@@ -32,6 +32,7 @@ import 'controller/auth_controller.dart';
 import 'controller/home_controller.dart';
 import 'controller/request_controller.dart';
 import 'controller/bottom_nav_controller.dart';
+import 'controller/badge_controller.dart';
 
 // Services
 import 'services/notification_service.dart';
@@ -91,6 +92,7 @@ void _initializeLegacyControllers() {
   Get.put(NavController(), permanent: true);
   Get.put(HomeController(), permanent: true);
   Get.put(RequestController(), permanent: true);
+  Get.put(BadgeController(), permanent: true); // Badge counts for chats, notifications, requests
 }
 
 /// Main App Widget with MVVM Architecture
