@@ -1,95 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../constant/colors.dart';
-import '../domain/entities/message_entity.dart';
-import '../presentation/features/chat/viewmodel/chat_viewmodel.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../domain/entities/message_entity.dart';
+import '../viewmodel/chat_viewmodel.dart';
 
-/// Chat Screen - Uses ChatViewModel for state management
-class ChatScreen extends StatelessWidget {
-  const ChatScreen({super.key});
+/// Chat View - Pure UI, no business logic
+/// All logic is handled by ChatViewModel
+class ChatView extends StatefulWidget {
+  const ChatView({super.key});
+
+  @override
+  State<ChatView> createState() => _ChatViewState();
+}
+
+class _ChatViewState extends State<ChatView> {
+  late final ChatViewModel controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<ChatViewModel>();
+    // Initialize chat screen after build phase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = Get.arguments as Map<String, dynamic>?;
+      controller.initChatScreen(args);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Get or find ChatViewModel
-    final ChatViewModel viewModel = Get.find<ChatViewModel>();
-    
-    // Initialize chat screen with arguments
-    final args = Get.arguments as Map<String, dynamic>?;
-    viewModel.initChatScreen(args);
-
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: _buildAppBar(viewModel),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
-          // Messages List
-          Expanded(child: _buildMessagesList(viewModel)),
-          // Message Input
-          _buildMessageInput(viewModel),
+          Expanded(child: _buildMessagesList()),
+          _buildMessageInput(),
         ],
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(ChatViewModel viewModel) {
+  PreferredSizeWidget _buildAppBar() {
     return AppBar(
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          viewModel.closeChatRoom();
+          controller.closeChatRoom();
           Get.back();
         },
       ),
       title: Obx(() => Row(
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: Colors.white,
-            backgroundImage: viewModel.otherUserPhoto.isNotEmpty
-                ? NetworkImage(viewModel.otherUserPhoto)
-                : null,
-            child: viewModel.otherUserPhoto.isEmpty
-                ? const Icon(Icons.person, color: Colors.grey, size: 20)
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                viewModel.otherUserName,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const Text(
-                'Online',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+              _buildUserAvatar(),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    controller.otherUserName,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  const Text(
+                    'Online',
+                    style:
+                        TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
-      )),
+          )),
       actions: [
         IconButton(
           icon: const Icon(Icons.call),
-          onPressed: () => viewModel.showComingSoon('Voice call'),
+          onPressed: () => controller.showComingSoon('Voice call'),
         ),
       ],
     );
   }
 
-  Widget _buildMessagesList(ChatViewModel viewModel) {
+  Widget _buildUserAvatar() {
+    return CircleAvatar(
+      radius: 18,
+      backgroundColor: Colors.white,
+      backgroundImage: controller.otherUserPhoto.isNotEmpty
+          ? NetworkImage(controller.otherUserPhoto)
+          : null,
+      child: controller.otherUserPhoto.isEmpty
+          ? const Icon(Icons.person, color: Colors.grey, size: 20)
+          : null,
+    );
+  }
+
+  Widget _buildMessagesList() {
     return Obx(() {
-      if (viewModel.isLoading) {
+      if (controller.isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (viewModel.error != null && viewModel.messages.isEmpty) {
-        return Center(child: Text(viewModel.error!));
+      if (controller.error != null && controller.messages.isEmpty) {
+        return Center(child: Text(controller.error!));
       }
 
-      if (viewModel.messages.isEmpty) {
+      if (controller.messages.isEmpty) {
         return const Center(
           child: Text(
             'No messages yet.\nStart the conversation!',
@@ -100,25 +116,25 @@ class ChatScreen extends StatelessWidget {
       }
 
       return ListView.builder(
-        controller: viewModel.scrollController,
+        controller: controller.scrollController,
         padding: const EdgeInsets.all(16),
-        itemCount: viewModel.messages.length,
+        itemCount: controller.messages.length,
         itemBuilder: (context, index) {
-          final message = viewModel.messages[index];
-          final isMe = viewModel.isMessageFromMe(message);
+          final message = controller.messages[index];
+          final isMe = controller.isMessageFromMe(message);
           final isSystem = message.type == 'system';
 
           if (isSystem) {
             return _buildSystemMessage(message.message);
           }
 
-          return _buildMessageBubble(context, message, isMe, viewModel);
+          return _buildMessageBubble(context, message, isMe);
         },
       );
     });
   }
 
-  Widget _buildMessageInput(ChatViewModel viewModel) {
+  Widget _buildMessageInput() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -142,44 +158,47 @@ class ChatScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: TextField(
-                  controller: viewModel.messageController,
+                  controller: controller.messageController,
                   decoration: const InputDecoration(
                     hintText: 'Type a message...',
                     border: InputBorder.none,
                   ),
                   textCapitalization: TextCapitalization.sentences,
-                  onSubmitted: (_) => viewModel.sendMessage(),
+                  onSubmitted: (_) => controller.sendMessage(),
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            Obx(() => Container(
-              decoration: BoxDecoration(
-                color: viewModel.isSendingMessage 
-                    ? AppColors.primary.withOpacity(0.5)
-                    : AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: viewModel.isSendingMessage 
-                    ? null 
-                    : () => viewModel.sendMessage(),
-                icon: viewModel.isSendingMessage
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.send, color: Colors.white),
-              ),
-            )),
+            _buildSendButton(),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildSendButton() {
+    return Obx(() => Container(
+          decoration: BoxDecoration(
+            color: controller.isSendingMessage
+                ? AppColors.primary.withOpacity(0.5)
+                : AppColors.primary,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            onPressed:
+                controller.isSendingMessage ? null : () => controller.sendMessage(),
+            icon: controller.isSendingMessage
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.send, color: Colors.white),
+          ),
+        ));
   }
 
   Widget _buildSystemMessage(String message) {
@@ -206,9 +225,8 @@ class ChatScreen extends StatelessWidget {
     BuildContext context,
     MessageEntity message,
     bool isMe,
-    ChatViewModel viewModel,
   ) {
-    final time = viewModel.formatMessageTime(message.createdAt);
+    final time = controller.formatMessageTime(message.createdAt);
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -235,7 +253,8 @@ class ChatScreen extends StatelessWidget {
           ],
         ),
         child: Column(
-          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Text(
               message.message,

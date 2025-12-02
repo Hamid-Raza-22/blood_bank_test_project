@@ -180,12 +180,17 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     final User? user = FirebaseAuth.instance.currentUser;
-
+    final Color primaryRed = const Color(0xFF8B0000);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Blood Requests", style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: primaryRed,
+        foregroundColor: Colors.white,
+        elevation: 2,
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(

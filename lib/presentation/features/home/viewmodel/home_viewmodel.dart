@@ -22,20 +22,29 @@ class HomeViewModel extends GetxController {
   final _unreadNotificationCount = 0.obs;
   final _recentNeeds = <PublicNeedEntity>[].obs;
   final _currentIndex = 0.obs;
+  final _currentUserName = Rxn<String>();
+  final _currentUserPhoto = Rxn<String>();
 
   // Getters
   int get unreadNotificationCount => _unreadNotificationCount.value;
   List<PublicNeedEntity> get recentNeeds => _recentNeeds;
   int get currentIndex => _currentIndex.value;
+  String? get currentUserName => _currentUserName.value;
+  String? get currentUserPhoto => _currentUserPhoto.value;
   
   String? get currentUserId => _authRepository.currentUser?.id;
-  String? get currentUserName => _authRepository.currentUser?.name;
-  String? get currentUserPhoto => _authRepository.currentUser?.photoUrl;
 
   @override
   void onInit() {
     super.onInit();
+    _loadUserInfo();
     _initStreams();
+  }
+
+  void _loadUserInfo() {
+    final user = _authRepository.currentUser;
+    _currentUserName.value = user?.name;
+    _currentUserPhoto.value = user?.photoUrl;
   }
 
   void _initStreams() {

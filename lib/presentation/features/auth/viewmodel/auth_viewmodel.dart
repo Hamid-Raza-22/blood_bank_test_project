@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../domain/repositories/auth_repository.dart';
@@ -10,9 +12,11 @@ import '../../../routes/app_routes.dart';
 
 /// Auth ViewModel - handles authentication state and logic
 /// 
-/// Uses SessionService for persistent login:
-/// - Saves session securely after successful login
-/// - Clears session on logout
+/// Follows Clean Architecture:
+/// - Uses UseCases for business logic
+/// - Uses Repository for data access
+/// - Uses SessionService for persistent login
+/// - No business logic in Views
 class AuthViewModel extends GetxController {
   final AuthRepository _authRepository;
   final LoginUseCase _loginUseCase;
@@ -35,35 +39,54 @@ class AuthViewModel extends GetxController {
         _logoutUseCase = logoutUseCase,
         _sessionService = sessionService ?? Get.find<SessionService>();
 
-  // Observable states
+  // === Observable States ===
   final _isLoading = false.obs;
   final _errorMessage = RxnString();
   final _isAuthenticated = false.obs;
+  final _isPasswordVisible = false.obs;
+  final _isConfirmPasswordVisible = false.obs;
+  final _rememberMe = false.obs;
+  final _generatedOtp = ''.obs;
 
-  // Form controllers
+  // === Form Controllers ===
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  late final List<TextEditingController> otpControllers;
 
-  // Getters
+  // === Getters ===
   bool get isLoading => _isLoading.value;
   String? get errorMessage => _errorMessage.value;
   bool get isAuthenticated => _isAuthenticated.value;
+  bool get isPasswordVisible => _isPasswordVisible.value;
+  bool get isConfirmPasswordVisible => _isConfirmPasswordVisible.value;
+  bool get rememberMe => _rememberMe.value;
 
   @override
   void onInit() {
     super.onInit();
+    otpControllers = List.generate(6, (_) => TextEditingController());
     _checkAuthStatus();
     _listenToAuthChanges();
   }
 
   @override
   void onClose() {
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    for (final controller in otpControllers) {
+      controller.dispose();
+    }
     super.onClose();
   }
+
+  // === UI State Actions ===
+  void togglePasswordVisibility() => _isPasswordVisible.toggle();
+  void toggleConfirmPasswordVisibility() => _isConfirmPasswordVisible.toggle();
+  void setRememberMe(bool value) => _rememberMe.value = value;
 
   void _checkAuthStatus() {
     _isAuthenticated.value = _authRepository.isAuthenticated;
@@ -280,5 +303,64 @@ class AuthViewModel extends GetxController {
 
   void clearError() {
     _errorMessage.value = null;
+  }
+
+  // === OTP Methods ===
+  
+  /// Generate random 6-digit OTP
+  String _generateOtp() {
+    final random = Random();
+    return (100000 + random.nextInt(900000)).toString();
+  }
+
+  /// Get OTP from input fields
+  String get enteredOtp {
+    return otpControllers.map((c) => c.text).join();
+  }
+
+  /// Clear OTP fields
+  void _clearOtpFields() {
+    for (final controller in otpControllers) {
+      controller.clear();
+    }
+  }
+
+  /// Verify OTP entered by user
+  Future<bool> verifyOtp() async {
+    final otp = enteredOtp;
+    if (otp.length != 6) {
+      _showError('Please enter complete OTP');
+      return false;
+    }
+
+    if (otp != _generatedOtp.value) {
+      _showError('Invalid OTP');
+      return false;
+    }
+
+    _clearOtpFields();
+    Get.snackbar('Success', 'OTP verified successfully');
+    return true;
+  }
+
+  /// Resend OTP
+  Future<void> resendOtp() async {
+    if (emailController.text.isEmpty) {
+      _showError('Email is required');
+      return;
+    }
+
+    _isLoading.value = true;
+    try {
+      final otp = _generateOtp();
+      _generatedOtp.value = otp;
+      // In real app, send via email service
+      debugPrint('OTP: $otp'); // For testing
+      Get.snackbar('OTP Sent', 'New OTP sent to ${emailController.text}');
+    } catch (e) {
+      _showError('Failed to send OTP');
+    } finally {
+      _isLoading.value = false;
+    }
   }
 }

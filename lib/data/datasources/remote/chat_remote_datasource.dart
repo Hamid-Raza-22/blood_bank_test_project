@@ -108,11 +108,17 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // Update chat room's last message
+      // Get chat room to find other participant
+      final chatRoomDoc = await _chatRoomsCollection.doc(chatRoomId).get();
+      final participants = List<String>.from((chatRoomDoc.data() as Map)['participants'] ?? []);
+      final otherUserId = participants.firstWhere((id) => id != senderId, orElse: () => '');
+
+      // Update chat room's last message and increment unread count for other user
       await _chatRoomsCollection.doc(chatRoomId).update({
         'lastMessage': message,
         'lastMessageTime': FieldValue.serverTimestamp(),
         'lastMessageSenderId': senderId,
+        'unreadCount.$otherUserId': FieldValue.increment(1),
       });
 
       final doc = await docRef.get();
@@ -151,6 +157,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         batch.update(doc.reference, {'isRead': true});
       }
       await batch.commit();
+
+      // Reset unread count for this user
+      await _chatRoomsCollection.doc(chatRoomId).update({
+        'unreadCount.$userId': 0,
+      });
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -196,9 +207,18 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     return ChatRoomEntity(
       id: doc.id,
       participants: List<String>.from(data['participants'] ?? []),
+      participantNames: data['participantNames'] != null
+          ? Map<String, String>.from(data['participantNames'])
+          : null,
+      participantPhotos: data['participantPhotos'] != null
+          ? Map<String, String>.from(data['participantPhotos'])
+          : null,
       lastMessage: data['lastMessage'],
       lastMessageTime: (data['lastMessageTime'] as Timestamp?)?.toDate(),
       lastMessageSenderId: data['lastMessageSenderId'],
+      unreadCount: data['unreadCount'] != null
+          ? Map<String, int>.from(data['unreadCount'])
+          : null,
       needId: data['needId'],
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
     );

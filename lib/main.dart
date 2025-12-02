@@ -1,16 +1,19 @@
 // main.dart
 // ============================================================================
-// BLOOD BANK APP - MVVM + DDD ARCHITECTURE
+// BLOOD BANK APP - CLEAN ARCHITECTURE + GETX MVVM
 // ============================================================================
 // 
 // Architecture Overview:
 // ├── core/           -> Constants, Utils, DI, Errors, Theme
 // ├── data/           -> DataSources, Models (DTOs), Repository Implementations
-// ├── domain/         -> Entities, Repository Interfaces, Use Cases
+// ├── domain/         -> Entities, Value Objects, Repository Interfaces, Use Cases
 // └── presentation/   -> Features (View + ViewModel), Common Widgets, Routes, Bindings
 //
+// Layer Dependencies:
+// Presentation → Domain ← Data
+//
 // Flow:
-// main() -> Firebase Init -> DI Init -> AppBinding -> Splash -> Auth Check -> Option/Login
+// main() -> Firebase Init -> DI Init -> AppBinding -> Splash -> Auth Check -> Home/Login
 //
 // ============================================================================
 
@@ -25,16 +28,17 @@ import 'core/theme/app_theme.dart';
 
 // Presentation - Routes & Bindings
 import 'presentation/routes/app_routes.dart';
-import 'presentation/bindings/app_bindings.dart';
+import 'presentation/routes/app_pages.dart';
+import 'presentation/bindings/app_binding.dart';
 
-// Legacy Controllers (for backward compatibility during migration)
+// Legacy Controllers (used by original screens)
 import 'controller/auth_controller.dart';
 import 'controller/home_controller.dart';
 import 'controller/request_controller.dart';
 import 'controller/bottom_nav_controller.dart';
 import 'controller/badge_controller.dart';
 
-// Services
+// Services (for notification initialization)
 import 'services/notification_service.dart';
 
 // === WEB FIREBASE CONFIG ===
@@ -56,7 +60,7 @@ void main() async {
   // Initialize Dependency Injection Container (MVVM + DDD)
   await sl.init();
 
-  // Initialize Legacy Controllers (for backward compatibility)
+  // Initialize Legacy Controllers (for original screens)
   _initializeLegacyControllers();
 
   // Initialize notification service (not on web)
@@ -66,6 +70,15 @@ void main() async {
 
   // Run app - Splash screen will handle auth state check and navigation
   runApp(const BloodBankApp());
+}
+
+/// Initialize legacy controllers for backward compatibility with original screens
+void _initializeLegacyControllers() {
+  Get.put(AuthController(), permanent: true);
+  Get.put(NavController(), permanent: true);
+  Get.put(HomeController(), permanent: true);
+  Get.put(RequestController(), permanent: true);
+  Get.put(BadgeController(), permanent: true);
 }
 
 /// Initialize Firebase based on platform
@@ -84,15 +97,6 @@ Future<void> _initializeFirebase() async {
   } else {
     await Firebase.initializeApp();
   }
-}
-
-/// Initialize legacy controllers for backward compatibility
-void _initializeLegacyControllers() {
-  Get.put(AuthController(), permanent: true);
-  Get.put(NavController(), permanent: true);
-  Get.put(HomeController(), permanent: true);
-  Get.put(RequestController(), permanent: true);
-  Get.put(BadgeController(), permanent: true); // Badge counts for chats, notifications, requests
 }
 
 /// Main App Widget with MVVM Architecture

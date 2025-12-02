@@ -1,17 +1,20 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../constant/colors.dart';
 import '../constant/size_helper.dart';
+import '../domain/entities/chat_room_entity.dart';
+import '../presentation/features/chat/viewmodel/chat_viewmodel.dart';
 
+/// Chat List Screen - Uses ChatViewModel for state management
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    
+    // Get or find ChatViewModel
+    final ChatViewModel viewModel = Get.find<ChatViewModel>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -22,83 +25,22 @@ class ChatListScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 2,
       ),
-      body: currentUserId == null
+      body: viewModel.currentUserId.isEmpty
           ? const Center(child: Text('Please log in to view chats'))
           : Padding(
               padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
               child: Column(
                 children: [
-                  _buildSearchField(),
+                  _buildSearchField(viewModel),
                   SizedBox(height: SizeConfig.blockHeight * 2),
-                  Expanded(
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('chat_rooms')
-                          .where('participants', arrayContains: currentUserId)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          debugPrint('ChatList Error: ${snapshot.error}');
-                          return const Center(child: Text('Error loading chats'));
-                        }
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-
-                        // Sort client-side to avoid index requirement
-                        final chatRooms = snapshot.data?.docs ?? [];
-                        chatRooms.sort((a, b) {
-                          final aTime = (a.data() as Map)['lastMessageTime'] as Timestamp?;
-                          final bTime = (b.data() as Map)['lastMessageTime'] as Timestamp?;
-                          if (aTime == null) return 1;
-                          if (bTime == null) return -1;
-                          return bTime.compareTo(aTime);
-                        });
-
-                        if (chatRooms.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.chat_bubble_outline,
-                                    size: 80, color: Colors.grey[300]),
-                                const SizedBox(height: 16),
-                                Text(
-                                  "No chats yet",
-                                  style: TextStyle(
-                                      fontSize: 18, color: Colors.grey[600]),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  "Accept a blood request to start chatting",
-                                  style: TextStyle(
-                                      fontSize: 14, color: Colors.grey[400]),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        return ListView.builder(
-                          itemCount: chatRooms.length,
-                          itemBuilder: (context, index) {
-                            final data =
-                                chatRooms[index].data() as Map<String, dynamic>;
-                            final chatRoomId = chatRooms[index].id;
-                            return _buildChatItem(
-                                context, chatRoomId, data, currentUserId);
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                  Expanded(child: _buildChatList(viewModel)),
                 ],
               ),
             ),
     );
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField(ChatViewModel viewModel) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4),
       decoration: BoxDecoration(
@@ -106,6 +48,8 @@ class ChatListScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextField(
+        controller: viewModel.searchController,
+        onChanged: viewModel.updateSearchQuery,
         decoration: InputDecoration(
           hintText: "Search chats...",
           hintStyle: TextStyle(fontSize: SizeConfig.blockWidth * 3.8),
@@ -115,38 +59,74 @@ class ChatListScreen extends StatelessWidget {
             color: Colors.grey[600],
             size: SizeConfig.blockWidth * 6,
           ),
+          suffixIcon: Obx(() => viewModel.searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.clear, size: SizeConfig.blockWidth * 5),
+                  onPressed: viewModel.clearSearch,
+                )
+              : const SizedBox.shrink()),
         ),
       ),
     );
   }
 
-  Widget _buildChatItem(BuildContext context, String chatRoomId,
-      Map<String, dynamic> data, String currentUserId) {
-    // Get the other participant's info
-    final participants = List<String>.from(data['participants'] ?? []);
-    final otherUserId =
-        participants.firstWhere((id) => id != currentUserId, orElse: () => '');
-    
-    final participantNames =
-        Map<String, dynamic>.from(data['participantNames'] ?? {});
-    final participantPhotos =
-        Map<String, dynamic>.from(data['participantPhotos'] ?? {});
-    
-    final otherUserName = participantNames[otherUserId] ?? 'User';
-    final otherUserPhoto = participantPhotos[otherUserId] ?? '';
-    final lastMessage = data['lastMessage'] ?? 'No messages';
-    final lastMessageTime = data['lastMessageTime'] as Timestamp?;
-    final bloodType = data['bloodType'] ?? '';
+  Widget _buildChatList(ChatViewModel viewModel) {
+    return Obx(() {
+      if (viewModel.isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (viewModel.error != null && viewModel.filteredChatRooms.isEmpty) {
+        return Center(child: Text(viewModel.error!));
+      }
+
+      if (viewModel.filteredChatRooms.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.chat_bubble_outline, size: 80, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(
+                viewModel.searchQuery.isNotEmpty
+                    ? "No chats found"
+                    : "No chats yet",
+                style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                viewModel.searchQuery.isNotEmpty
+                    ? "Try a different search term"
+                    : "Accept a blood request to start chatting",
+                style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return ListView.builder(
+        itemCount: viewModel.filteredChatRooms.length,
+        itemBuilder: (context, index) {
+          final chatRoom = viewModel.filteredChatRooms[index];
+          return _buildChatItem(context, chatRoom, viewModel);
+        },
+      );
+    });
+  }
+
+  Widget _buildChatItem(
+    BuildContext context,
+    ChatRoomEntity chatRoom,
+    ChatViewModel viewModel,
+  ) {
+    final otherUserName = viewModel.getOtherUserNameForRoom(chatRoom);
+    final otherUserPhoto = viewModel.getOtherUserPhotoForRoom(chatRoom);
+    final lastMessage = chatRoom.lastMessage ?? 'No messages';
+    final lastMessageTime = chatRoom.lastMessageTime;
 
     return GestureDetector(
-      onTap: () {
-        Get.toNamed('/chat', arguments: {
-          'chatRoomId': chatRoomId,
-          'otherUserId': otherUserId,
-          'otherUserName': otherUserName,
-          'otherUserPhoto': otherUserPhoto,
-        });
-      },
+      onTap: () => viewModel.navigateToChat(chatRoom),
       child: Container(
         padding: EdgeInsets.symmetric(
             vertical: SizeConfig.blockHeight * 1.5,
@@ -165,40 +145,14 @@ class ChatListScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: SizeConfig.blockWidth * 6,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: otherUserPhoto.isNotEmpty
-                      ? NetworkImage(otherUserPhoto)
-                      : null,
-                  child: otherUserPhoto.isEmpty
-                      ? const Icon(Icons.person, color: Colors.grey)
-                      : null,
-                ),
-                if (bloodType.isNotEmpty)
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        bloodType,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+            CircleAvatar(
+              radius: SizeConfig.blockWidth * 6,
+              backgroundColor: Colors.grey[200],
+              backgroundImage:
+                  otherUserPhoto.isNotEmpty ? NetworkImage(otherUserPhoto) : null,
+              child: otherUserPhoto.isEmpty
+                  ? const Icon(Icons.person, color: Colors.grey)
+                  : null,
             ),
             SizedBox(width: SizeConfig.blockWidth * 3),
             Expanded(
@@ -229,7 +183,7 @@ class ChatListScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  _formatTime(lastMessageTime),
+                  viewModel.formatTime(lastMessageTime),
                   style: TextStyle(
                     fontSize: SizeConfig.blockWidth * 3,
                     color: Colors.grey[500],
@@ -241,23 +195,6 @@ class ChatListScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatTime(Timestamp? timestamp) {
-    if (timestamp == null) return '';
-    final now = DateTime.now();
-    final date = timestamp.toDate();
-    final diff = now.difference(date);
-
-    if (diff.inDays > 0) {
-      return '${diff.inDays}d';
-    } else if (diff.inHours > 0) {
-      return '${diff.inHours}h';
-    } else if (diff.inMinutes > 0) {
-      return '${diff.inMinutes}m';
-    } else {
-      return 'now';
-    }
   }
 }
 

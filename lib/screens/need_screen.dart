@@ -24,14 +24,22 @@ class BloodNeededScreen extends StatelessWidget {
         Get.back();
       });
     }
-
+    final Color primaryRed = const Color(0xFF8B0000);
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: const Text("Request Blood"),
-          backgroundColor: Colors.white,
-          elevation: 0,
+          // backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+          backgroundColor: primaryRed,
+          foregroundColor: Colors.white,
+          elevation: 2,
+
+          // automaticallyImplyLeading: false,
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
