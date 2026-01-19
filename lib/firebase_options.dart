@@ -28,15 +28,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -50,30 +44,51 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCoF2K_zDQZFxk0jevwI3nNygzjaphhn5k',
-    appId: '1:445010648741:android:f7519ddf2f890677deb74c',
-    messagingSenderId: '445010648741',
-    projectId: 'blood-bank-146c7',
-    storageBucket: 'blood-bank-146c7.firebasestorage.app',
+    apiKey: 'AIzaSyDvAz-JCPEL9AGmPMA8t5Pe-H3-2GD2VTI',
+    appId: '1:419434734005:android:06820488d5aecfada5f9fc',
+    messagingSenderId: '419434734005',
+    projectId: 'blood-bank-39c73',
+    storageBucket: 'blood-bank-39c73.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBJ9y2M1Uc2g6HIjENvf6LzfxfS2JQprJo',
-    appId: '1:445010648741:ios:f185c670716374aedeb74c',
-    messagingSenderId: '445010648741',
-    projectId: 'blood-bank-146c7',
-    storageBucket: 'blood-bank-146c7.firebasestorage.app',
-    iosClientId: '445010648741-1ejm1oa00nsae17ish5lvbf9k6mht86p.apps.googleusercontent.com',
-    iosBundleId: 'com.example.bloodBankTestProject',
+    apiKey: 'AIzaSyCCs7loMI-Jw6eJat7RteMSBakEmpVcvCA',
+    appId: '1:419434734005:ios:9480b6ebf0329796a5f9fc',
+    messagingSenderId: '419434734005',
+    projectId: 'blood-bank-39c73',
+    storageBucket: 'blood-bank-39c73.firebasestorage.app',
+    iosClientId: '419434734005-0ee4lb2dtrod3071kd6hrphlch61a3qa.apps.googleusercontent.com',
+    iosBundleId: 'com.octalogicx.bloodbankproject',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: "AIzaSyDWIjwVCFovNzGows6hpt1FchMpdP3UvJI",
-    authDomain: "blood-bank-146c7.firebaseapp.com",
-    projectId: "blood-bank-146c7",
-    storageBucket: "blood-bank-146c7.firebasestorage.app",
-    messagingSenderId: "445010648741",
-    appId: "1:445010648741:web:c8e0d61299f5e462deb74c",
-    measurementId: "G-H0SGEMLLZ2"
+    apiKey: 'AIzaSyCcHTqqK9mQR2XpYRjcbHrEK80jmmRupT8',
+    appId: '1:419434734005:web:e0488537ac1edbf0a5f9fc',
+    messagingSenderId: '419434734005',
+    projectId: 'blood-bank-39c73',
+    authDomain: 'blood-bank-39c73.firebaseapp.com',
+    storageBucket: 'blood-bank-39c73.firebasestorage.app',
+    measurementId: 'G-F2BTMHWWBX',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCCs7loMI-Jw6eJat7RteMSBakEmpVcvCA',
+    appId: '1:419434734005:ios:9480b6ebf0329796a5f9fc',
+    messagingSenderId: '419434734005',
+    projectId: 'blood-bank-39c73',
+    storageBucket: 'blood-bank-39c73.firebasestorage.app',
+    iosClientId: '419434734005-0ee4lb2dtrod3071kd6hrphlch61a3qa.apps.googleusercontent.com',
+    iosBundleId: 'com.octalogicx.bloodbankproject',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCcHTqqK9mQR2XpYRjcbHrEK80jmmRupT8',
+    appId: '1:419434734005:web:cc6d971faf0c5955a5f9fc',
+    messagingSenderId: '419434734005',
+    projectId: 'blood-bank-39c73',
+    authDomain: 'blood-bank-39c73.firebaseapp.com',
+    storageBucket: 'blood-bank-39c73.firebasestorage.app',
+    measurementId: 'G-N98VYN1Y0S',
+  );
+
 }

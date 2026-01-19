@@ -1,4 +1,4 @@
-package com.example.blood_bank_test_project
+package com.octalogicx.bloodbankproject
 
 import io.flutter.embedding.android.FlutterActivity
 
